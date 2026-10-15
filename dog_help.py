@@ -110,43 +110,34 @@ elif menu == "Помочь приюту":
         st.write("**Телефон:** +375 (29) XXX-XX-XX (Татьяна)")
 
 # === СТРАНИЦА 3: АДМИНКА ДЛЯ ТАТЬЯНЫ ===
-elif menu == "Админка ":
-    st.title("🔒 Панель управления сайтом")
-    st.write("Здесь вы можете добавлять новых животных на главную страницу.")
+elif menu == "Админка (Для Татьяны)":
+    st.title("Панель управления")
     
-    # Простая защита паролем, чтобы обычные посетители не хулиганили
-    password = st.text_input("Введите пароль администратора", type="password")
-    
-    if password == "admin123": # Пароль по умолчанию, потом можно сменить
-        st.success("Доступ разрешен!")
+    with st.form("add_animal_form", clear_on_submit=True):
+        st.subheader("Добавление нового питомца")
         
-        with st.form("add_animal_form", clear_on_submit=True):
-            st.subheader("📝 Данные нового питомца")
-            
-            new_name = st.text_input("Кличка животного")
-            new_type = st.selectbox("Кто это?", ["Собака", "Кошка", "Другое"])
-            new_age = st.text_input("Возраст (например: 5 месяцев, 1 год)")
-            new_desc = st.text_area("Описание характера и истории животного")
-            
-            # Ссылка на фото (для простоты на старте)
-            new_img = st.text_input("Ссылка на фотографию животного (URL)", 
-                                    value="https://unsplash.com")
-            
-            submit = st.form_submit_button("Добавить питомца на сайт")
-            
-            if submit:
-                if new_name and new_desc:
-                    new_pet = {
-                        "name": new_name,
-                        "type": new_type,
-                        "age": new_age,
-                        "desc": new_desc,
-                        "img": new_img
-                    }
-                    st.session_state.animals_list.append(new_pet)
-                    save_animals(st.session_state.animals_list)
-                    st.success(f"🎉 {new_name} успешно добавлен на сайт!")
-                else:
-                    st.error("Пожалуйста, заполните как минимум кличку и описание.")
-    elif password:
-        st.error("Неверный пароль!")
+        new_name = st.text_input("Кличка животного")
+        new_type = st.selectbox("Кто это?", ["Собака", "Кошка", "Другое"])
+        new_age = st.text_input("Возраст (например: 5 месяцев, 1 год)")
+        new_desc = st.text_area("Описание характера и истории")
+        
+        # Стандартная ссылка на фото, чтобы не ломался код, если Татьяна не вставит свою
+        new_img = st.text_input("Ссылка на фотографию (URL)", 
+                                value="https://unsplash.com")
+        
+        submit = st.form_submit_button("Добавить на сайт")
+        
+        if submit:
+            if new_name and new_desc:
+                new_pet = {
+                    "name": new_name,
+                    "type": new_type,
+                    "age": new_age,
+                    "desc": new_desc,
+                    "img": new_img
+                }
+                st.session_state.animals_list.append(new_pet)
+                save_animals(st.session_state.animals_list)
+                st.success(f"🎉 {new_name} успешно добавлен!")
+            else:
+                st.error("Пожалуйста, введите имя и описание питомца.")
