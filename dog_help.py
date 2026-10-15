@@ -20,7 +20,7 @@ st.markdown(
     
     /* Фиксируем темный цвет кнопок с золотой рамкой */
     .stButton > button {
-        background-color: #140f0d !important;
+        background-color: #046307 !important;
         color: #046307 !important;
         border: 1px solid #bc987e !important;
         transition: all 0.3s ease;
@@ -44,7 +44,7 @@ st.markdown("""
     background-size: cover !important;
     background-position: center !important;
     background-attachment: fixed !important;
-    background-color: #e8d5a8 !important;
+    background-color: #E8D5A8 !important;
 } 
 
 }
