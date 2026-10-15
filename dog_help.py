@@ -26,7 +26,7 @@ st.markdown("""
         color: #2e7d32 !important;
     }
     </style>
-""", unsafe_base_color=True, unsafe_allow_html=True)
+""", unsafe_allow_html=True) # Оставили только этот параметр!
 
 # 2. База данных во временном файле JSON
 DB_FILE = "animals.json"
