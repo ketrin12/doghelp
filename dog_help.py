@@ -44,7 +44,7 @@ st.markdown("""
     background-size: cover !important;
     background-position: center !important;
     background-attachment: fixed !important;
-    background-color: #e8d5a8 !important;
+    background-color: #ffffff !important;
 } 
 
 }
