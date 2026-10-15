@@ -1,140 +1,152 @@
 import streamlit as st
+import json
+import os
 
+# 1. Настройка страницы и темы (Белый фон, зеленые элементы)
 st.set_page_config(
-    page_title="Ketrin Plase | Главная",
-    page_icon="🌸",
-    layout="wide",
-    initial_sidebar_state="collapsed"  # Сворачиваем меню по умолчанию
+    page_title="Приют для животных - Подари дом",
+    page_icon="🐾",
+    layout="wide"
 )
 
-# Полностью убираем боковое меню и жестко задаем цвет кнопок
-st.markdown(
-    """
+# Кастомные стили для изменения цвета кнопок и шрифтов на зеленый
+st.markdown("""
     <style>
-    /* Полностью скрываем боковую панель, кнопку открытия и всю верхнюю техническую шапку */
-    [data-testid="stSidebar"], 
-    [data-testid="collapsedControl"], 
-    [data-testid="stHeader"] {
-        display: none !important;
+    .stButton>button {
+        background-color: #2e7d32 !important;
+        color: white !important;
+        border-radius: 10px;
+        border: none;
     }
-    
-    /* Фиксируем темный цвет кнопок с золотой рамкой */
-    .stButton > button {
-        background-color: #046307 !important;
-        color: #046307 !important;
-        border: 1px solid #bc987e !important;
-        transition: all 0.3s ease;
+    .stButton>button:hover {
+        background-color: #1b5e20 !important;
+        color: white !important;
     }
-    
-    /* Эффект при наведении мышки на ПК */
-    .stButton > button:hover {
-        background-color: #bc987e !important;
-        color: #140f0d !important;
+    h1, h2, h3 {
+        color: #2e7d32 !important;
     }
     </style>
-    """,
-    unsafe_allow_html=True
-)
+""", unsafe_base_color=True, unsafe_allow_html=True)
 
-st.markdown("""
-<style>
-/* Фиксируем красивый темный фон */
-.stApp, .main, [data-testid="stAppViewContainer"] { 
-    background-image: linear-gradient(rgba(20, 15, 13, 0.8), rgba(20, 15, 13, 0.8)), url("https://ibb.co") !important;
-    background-size: cover !important;
-    background-position: center !important;
-    background-attachment: fixed !important;
-    background-color: #ffffff !important;
-} 
+# 2. База данных во временном файле JSON
+DB_FILE = "animals.json"
 
-}
-[data-testid="stSidebarCollapseButton"] button::after {
-    content: "•" !important; /* Ставим аккуратную точку */
-    font-size: 28px !important;
-    color: #dfba9d !important; /* Красим в золото */
-    display: block !important;
-    line-height: 1 !important;
-}
+def load_animals():
+    if os.path.exists(DB_FILE):
+        with open(DB_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    # Стартовые данные для примера, если файл еще не создан
+    return [
+        {
+            "name": "Боня",
+            "type": "Собака",
+            "age": "2 года",
+            "desc": "Очень добрый и игривый пес. Любит детей, приучен к поводку.",
+            "img": "https://unsplash.com"
+        },
+        {
+            "name": "Мурка",
+            "type": "Кошка",
+            "age": "6 месяцев",
+            "desc": "Ласковая мурлыка, трехцветная (на счастье!). Ищет уютный дом.",
+            "img": "https://unsplash.com"
+        }
+    ]
 
-/* Элегантные шрифты для текста */
-h1, h2, h3, h4, h5, h6, p, span, label, li, div, b { 
-    color: #f5ebe6 !important; 
-    font-family: 'Georgia', serif !important; 
-}
+def save_animals(data):
+    with open(DB_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
 
-/* Шоколадное боковое меню */
-[data-testid="stSidebar"], [data-testid="stSidebarNav"] {
-    background-color: #2d2320 !important;
-}
+# Загружаем текущий список животных
+if 'animals_list' not in st.session_state:
+    st.session_state.animals_list = load_animals()
 
-/* Золотые вкладки в меню */
-[data-testid="stSidebarNav"] span, [data-testid="stSidebarNav"] a {
-    color: #dfba9d !important;
-    font-size: 18px !important;
-}
+# 3. Боковое меню (Sidebar) для навигации
+menu = st.sidebar.radio("Навигация по сайту", ["Главная (Питомцы)", "Помочь приюту", "Админка (Для Татьяны)"])
 
-/* Полностью стираем текст внутри кнопки на любых экранах */
-[data-testid="stSidebarCollapseButton"] div, 
-[data-testid="stSidebarCollapseButton"] span,
-[data-testid="stSidebarCollapseButton"] svg {
-    display: none !important;
-    font-size: 0 !important;
-    color: transparent !important;
-    width: 0 !important;
-    height: 0 !important;
-}
-[data-testid="stSidebarCollapseButton"] button {
-    display: none !important;
-}
+# === СТРАНИЦА 1: ГЛАВНАЯ (КАРТОЧКИ) ===
+if menu == "Главная (Питомцы)":
+    st.title("🐾 Подари дом пушистому другу")
+    st.write("Каждое из этих животных мечтает обрести любящую семью. Посмотрите на этих красавцев!")
+    
+    animals = st.session_state.animals_list
+    
+    if not animals:
+        st.info("Сейчас все животные нашли свой дом! 🥰")
+    else:
+        # Отображаем карточки сеткой по 3 в ряд
+        for i in range(0, len(animals), 3):
+            cols = st.columns(3)
+            for j in range(3):
+                idx = i + j
+                if idx < len(animals):
+                    with cols[j]:
+                        item = animals[idx]
+                        st.image(item["img"], use_container_width=True)
+                        st.subheader(f"{item['name']} ({item['age']})")
+                        st.caption(f"Тип: {item['type']}")
+                        st.write(item["desc"])
+                        
+                        # Кнопка «Забрать» под каждой карточкой
+                        if st.button(f"Хочу забрать {item['name']}", key=f"btn_{idx}"):
+                            st.success(f"Прекрасный выбор! Свяжитесь с нами по телефону или в мессенджерах, чтобы познакомиться с {item['name']}.")
+                        st.markdown("---")
 
-</style>
-""", unsafe_allow_html=True)
+# === СТРАНИЦА 2: ПОМОЩЬ ПРИЮТУ ===
+elif menu == "Помочь приюту":
+    st.title("💚 Кнопка помощи приюту")
+    st.write("Если вы пока не можете взять питомца домой, вы можете помочь им финансово на корм и лечение.")
+    
+    st.info("ℹ️ Все поступающие средства идут напрямую на покупку корма, лекарств и оплату ветеринаров.")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("💳 Банковская карта / ЕРИП")
+        st.code("Благотворительный счет в Беларусбанке:\nBYXX AKBB XXXX XXXX XXXX XXXX XXXX")
+        st.code("Код ЕРИП: 1234567 (Благотворительность -> Приют)")
+    with col2:
+        st.subheader("📞 Другие способы")
+        st.write("Вы также можете привезти корм, поводки или игрушки лично. Свяжитесь с нами!")
+        st.write("**Телефон:** +375 (29) XXX-XX-XX (Татьяна)")
 
-# Шапка сайта
-st.markdown(
-    "<div style='background-color: rgba(25, 20, 18, 0.9); padding: 30px; border-radius: 12px; text-align: center; border: 1px solid #4a3b32;'>"
-    "<h1 style='color: #dfba9d !important; margin: 0; font-size: 42px; letter-spacing: 2px;'>Ketrin Plase</h1>"
-    "<p style='margin: 10px 0 0 0; color: #b3b3b3 !important; font-size: 16px; letter-spacing: 3px; text-transform: uppercase;'>Премиум СПА-салон в Гомеле</p>"
-    "</div>", 
-    unsafe_allow_html=True
-)
-
-st.write("") 
-
-col1, col2 = st.columns([1.2, 1])
-
-with col1:
-    st.markdown("<h4 style='color: #bc987e !important; text-transform: uppercase; letter-spacing: 2px;'>Эстетика релакса</h4>", unsafe_allow_html=True)
-st.title("Добро пожаловать в Ketrin Plase")
-st.write("Выберите интересующий вас раздел в боковом меню слева, чтобы посмотреть цены или открыть галерею нашего салона.")
-
-# Добавляем крупные и понятные кнопки для мобильных пользователей прямо по центру
-st.markdown("### 📱 Быстрый переход по разделам:")
-col_menu1, col_menu2 = st.columns(2)
-
-with col_menu1:
-    if st.button("💰 Посмотреть ЦЕНЫ", use_container_width=True):
-        st.switch_page("pages/1_Цены.py") # Проверь, чтобы имя файла в скобках совпадало с твоим в папке pages
-
-with col_menu2:
-    if st.button("🖼️ Открыть ГАЛЕРЕЮ", use_container_width=True):
-        st.switch_page("pages/2_Галерея.py") # Проверь, чтобы имя файла в скобках совпадало с твоим в папке pages
-
-st.divider()
-
-# Форма онлайн-записи
-st.markdown("<h2>📩 Онлайн-резервирование визита</h2>", unsafe_allow_html=True)
-FORMSPREE_URL = "https://formspree.io" 
-
-form_html = f"""
-<form action="{FORMSPREE_URL}" method="POST" style="background-color: rgba(25, 20, 18, 0.9); padding: 30px; border-radius: 12px; border: 1px solid #4a3b32;">
-    <div style="margin-bottom: 20px;"><label style="color: #dfba9d !important; font-weight: bold;">Ваше имя:</label><br><input type="text" name="name" required style="width: 100%; padding: 12px; background-color: #140f0d; border: 1px solid #bc987e; border-radius: 6px; color: white;"></div>
-    <div style="margin-bottom: 20px;"><label style="color: #dfba9d !important; font-weight: bold;">Телефон или Email:</label><br><input type="email" name="_replyto" required style="width: 100%; padding: 12px; background-color: #140f0d; border: 1px solid #bc987e; border-radius: 6px; color: white;"></div>
-    <div style="margin-bottom: 20px;"><label style="color: #dfba9d !important; font-weight: bold;">Пожелания к визиту:</label><br><textarea name="message" required style="width: 100%; height: 100px; background-color: #140f0d; border: 1px solid #bc987e; border-radius: 6px; color: white; resize: none;"></textarea></div>
-    <button type="submit" style="background-color: #bc987e; color: #231f20; padding: 14px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; text-transform: uppercase;">Забронировать визит</button>
-</form>
-"""
-st.markdown(form_html, unsafe_allow_html=True)
-
-st.divider()
-st.caption("© 2026 Ketrin Plase. Режим работы: с 9:00 до 23:00 ежедневно. Разработано будущим топовым ИТ-специалистом.")
+# === СТРАНИЦА 3: АДМИНКА ДЛЯ ТАТЬЯНЫ ===
+elif menu == "Админка (Для Татьяны)":
+    st.title("🔒 Панель управления сайтом")
+    st.write("Здесь вы можете добавлять новых животных на главную страницу.")
+    
+    # Простая защита паролем, чтобы обычные посетители не хулиганили
+    password = st.text_input("Введите пароль администратора", type="password")
+    
+    if password == "admin123": # Пароль по умолчанию, потом можно сменить
+        st.success("Доступ разрешен!")
+        
+        with st.form("add_animal_form", clear_on_submit=True):
+            st.subheader("📝 Данные нового питомца")
+            
+            new_name = st.text_input("Кличка животного")
+            new_type = st.selectbox("Кто это?", ["Собака", "Кошка", "Другое"])
+            new_age = st.text_input("Возраст (например: 5 месяцев, 1 год)")
+            new_desc = st.text_area("Описание характера и истории животного")
+            
+            # Ссылка на фото (для простоты на старте)
+            new_img = st.text_input("Ссылка на фотографию животного (URL)", 
+                                    value="https://unsplash.com")
+            
+            submit = st.form_submit_button("Добавить питомца на сайт")
+            
+            if submit:
+                if new_name and new_desc:
+                    new_pet = {
+                        "name": new_name,
+                        "type": new_type,
+                        "age": new_age,
+                        "desc": new_desc,
+                        "img": new_img
+                    }
+                    st.session_state.animals_list.append(new_pet)
+                    save_animals(st.session_state.animals_list)
+                    st.success(f"🎉 {new_name} успешно добавлен на сайт!")
+                else:
+                    st.error("Пожалуйста, заполните как минимум кличку и описание.")
+    elif password:
+        st.error("Неверный пароль!")
