@@ -10,23 +10,42 @@ st.set_page_config(
 )
 
 # Кастомные стили для изменения цвета кнопок и шрифтов на зеленый
+# Применяем фирменную палитру Татьяны
 st.markdown("""
     <style>
+    /* 1. Основной фон сайта (60%) — Мягкий кремово-бежевый */
+    .stApp {
+        background-color: #F7F4F0 !important;
+    }
+    
+    /* 2. Цвет главного текста и заголовков (30%) — Глубокий хвойно-зеленый */
+    h1, h2, h3, p, span, label, .stMarkdown {
+        color: #2F3E36 !important;
+    }
+    
+    /* 3. Главные кнопки (10%) — Приглушенный шалфейный */
     .stButton>button {
-        background-color: #2e7d32 !important;
-        color: white !important;
+        background-color: #7FA998 !important;
+        color: #F7F4F0 !important; /* Цвет текста на кнопке сделаем кремовым для контраста */
         border-radius: 10px;
-        border: none;
+        border: 1px solid #2F3E36;
+        font-weight: bold;
+        transition: 0.3s;
     }
+    
+    /* 4. Эффект при наведении на кнопку (Ховер) — Чуть темнее основного зеленого */
     .stButton>button:hover {
-        background-color: #1b5e20 !important;
+        background-color: #638A7A !important;
         color: white !important;
+        border-color: #2F3E36;
     }
-    h1, h2, h3 {
-        color: #2e7d32 !important;
+    
+    /* Подправка стиля бокового меню для гармонии */
+    .stSidebar {
+        background-color: #EFEBE4 !important; /* Чуть темнее основного фона для выделения панели */
     }
     </style>
-""", unsafe_allow_html=True) # Оставили только этот параметр!
+""", unsafe_allow_html=True)
 
 # 2. База данных во временном файле JSON
 DB_FILE = "animals.json"
