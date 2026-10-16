@@ -10,15 +10,25 @@ st.set_page_config(
     layout="wide"
 )
 
-# Кастомные стили (Палитра Татьяны)
+# Кастомные стили (Палитра Татьяны с полной адаптивностью под мобильные телефоны)
 st.markdown("""
     <style>
-    .stApp {
+    /* Отключаем любые попытки телефона применить темную тему */
+    @media (prefers-color-scheme: dark) {
+        .stApp { background-color: #F7F4F0 !important; }
+    }
+    
+    /* 1. Главный фон сайта */
+    .stApp, [data-testid="stAppViewContainer"] {
         background-color: #F7F4F0 !important;
     }
-    h1, h2, h3, p, span, label, .stMarkdown {
+    
+    /* 2. Цвет текста везде, включая мобильные подписи */
+    h1, h2, h3, p, span, label, li, .stMarkdown, [data-testid="stWidgetLabel"] p {
         color: #2F3E36 !important;
     }
+    
+    /* 3. Кнопки */
     .stButton>button {
         background-color: #7FA998 !important;
         color: #F7F4F0 !important; 
@@ -26,26 +36,51 @@ st.markdown("""
         border: 1px solid #2F3E36;
         font-weight: bold;
         transition: 0.3s;
+        width: 100% !important; /* На телефонах кнопки будут удобно на всю ширину экрана */
     }
     .stButton>button:hover {
         background-color: #638A7A !important;
         color: white !important;
         border-color: #2F3E36;
     }
-    .stSidebar {
+    
+    /* 4. Поля ввода текста и выпадающие списки (чтобы не сливались на телефонах) */
+    .stTextInput input, .stSelectbox div, .stTextArea textarea {
+        background-color: #FFFFFF !important;
+        color: #2F3E36 !important;
+        border: 1px solid #7FA998 !important;
+    }
+    
+    /* 5. Боковое меню (Sidebar) */
+    [data-testid="stSidebar"] {
         background-color: #EFEBE4 !important; 
     }
+    [data-testid="stSidebar"] * {
+        color: #2F3E36 !important;
+    }
+    
+    /* 6. Вкладки (Tabs) в админке */
+    button[data-baseweb="tab"] {
+        color: #2F3E36 !important;
+    }
+    button[data-baseweb="tab"][aria-selected="true"] {
+        background-color: #7FA998 !important;
+        color: white !important;
+        border-radius: 5px;
+    }
+    
+    /* Стили для статусов животных */
     .status-badge {
-        padding: 4px 10px;
+        padding: 6px 12px;
         border-radius: 5px;
         font-size: 14px;
         font-weight: bold;
         display: inline-block;
         margin-bottom: 10px;
     }
-    .status-otlov { background-color: #FFD2D2; color: #D32F2F; border: 1px solid #D32F2F; }
-    .status-perederzhka { background-color: #E2F0D9; color: #385723; border: 1px solid #385723; }
-    .status-street { background-color: #FFF2CC; color: #7F6000; border: 1px solid #7F6000; }
+    .status-otlov { background-color: #FFD2D2 !important; color: #D32F2F !important; border: 1px solid #D32F2F; }
+    .status-perederzhka { background-color: #E2F0D9 !important; color: #385723 !important; border: 1px solid #385723; }
+    .status-street { background-color: #FFF2CC !important; color: #7F6000 !important; border: 1px solid #7F6000; }
     </style>
 """, unsafe_allow_html=True)
 
