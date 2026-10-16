@@ -10,64 +10,57 @@ st.set_page_config(
     layout="wide"
 )
 
-# Кастомные стили (Палитра Татьяны с принудительной СВЕТЛОЙ темой)
+# Кастомные стили с контрастным тёмно-серым текстом для читаемости
 st.markdown("""
     <style>
-    /* ПРИКАЗ ДЛЯ СМАРТФОНОВ: ВКЛЮЧАТЬ ТОЛЬКО СВЕТЛУЮ ТЕМУ */
     html, body, [data-testid="stAppViewContainer"], .stApp {
         color-scheme: light !important;
         background-color: #F7F4F0 !important;
     }
     
-    /* 1. Основной фон сайта */
+    /* 1. Главный фон сайта */
     .stApp {
         background-color: #F7F4F0 !important;
     }
     
-    /* 3. Кнопки */
+    /* 2. Цвет текста — Делаем глубоким тёмно-серым (#2B2B2B) для максимального контраста */
+    h1, h2, h3, p, span, label, li, .stMarkdown, [data-testid="stWidgetLabel"] p {
+        color: #2B2B2B !important;
+    }
+    
+    /* 3. Кнопки (Приглушенный шалфейный) */
     .stButton>button {
         background-color: #7FA998 !important;
         color: #F7F4F0 !important; 
         border-radius: 10px;
-        border: 1px solid #2F3E36;
+        border: 1px solid #2B2B2B;
         font-weight: bold;
         transition: 0.3s;
-        width: 100% !important; /* На телефонах кнопки будут удобно на всю ширину экрана */
     }
     .stButton>button:hover {
         background-color: #638A7A !important;
         color: white !important;
-        border-color: #2F3E36;
+        border-color: #2B2B2B;
     }
     
-    /* 4. Поля ввода текста и выпадающие списки (чтобы не сливались на телефонах) */
+    /* 4. Поля ввода (Белый фон, тёмно-серый текст внутри) */
     .stTextInput input, .stSelectbox div, .stTextArea textarea {
         background-color: #FFFFFF !important;
-        color: #2F3E36 !important;
+        color: #2B2B2B !important;
         border: 1px solid #7FA998 !important;
     }
     
-    /* 5. Боковое меню (Sidebar) */
+    /* 5. Боковое меню */
     [data-testid="stSidebar"] {
         background-color: #EFEBE4 !important; 
     }
     [data-testid="stSidebar"] * {
-        color: #2F3E36 !important;
-    }
-    
-    /* 6. Вкладки (Tabs) в админке */
-    button[data-baseweb="tab"] {
-        color: #2F3E36 !important;
-    }
-    button[data-baseweb="tab"][aria-selected="true"] {
-        background-color: #7FA998 !important;
-        color: white !important;
-        border-radius: 5px;
+        color: #2B2B2B !important;
     }
     
     /* Стили для статусов животных */
     .status-badge {
-        padding: 6px 12px;
+        padding: 4px 10px;
         border-radius: 5px;
         font-size: 14px;
         font-weight: bold;
