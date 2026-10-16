@@ -202,8 +202,10 @@ elif menu == "Панель управления":
     if password == "admin123":
         st.success("Доступ разрешен!")
         
-        tab1, tab2 = st.tabs(["➕ Добавить питомца", "🗑️ Управление / Удаление"])
+        # Создаем три вкладки: Добавление, Редактирование и Удаление
+        tab1, tab2, tab3 = st.tabs(["➕ Добавить питомца", "✏️ Редактировать", "🗑️ Удалить с сайта"])
         
+        # --- ВКЛАДКА 1: ДОБАВЛЕНИЕ ---
         with tab1:
             with st.form("add_animal_form", clear_on_submit=True):
                 st.subheader("Добавление нового подопечного")
@@ -219,8 +221,7 @@ elif menu == "Панель управления":
                 new_needs = st.text_input("В чем нуждается? (например: Сбор на корм, Нужен дом)")
                 new_desc = st.text_area("Описание ситуации / Характер")
                 
-                # Кнопка ОБЗОР для загрузки картинок с ПК/телефона
-                uploaded_file = st.file_uploader("Выберите фото питомца", type=["jpg", "jpeg", "png"])
+                uploaded_file = st.file_uploader("Выберите фото питомца", type=["jpg", "jpeg", "png"], key="add_upload")
                 
                 submit = st.form_submit_button("Добавить на сайт")
                 
@@ -244,17 +245,84 @@ elif menu == "Панель управления":
                     else:
                         st.error("Пожалуйста, введите кличку и описание.")
         
+        # --- ВКЛАДКА 2: РЕДАКТИРОВАНИЕ (НОВАЯ ФУНКЦИЯ) ---
         with tab2:
+            st.subheader("📝 Редактирование карточки животного")
+            animals = st.session_state.animals_list
+            
+            if not animals:
+                st.info("На сайте пока нет животных для редактирования.")
+            else:
+                # 1. Выбираем, кого именно хотим изменить
+                animal_options = [f"{pet['name']} ({pet['type']})" for pet in animals]
+                selected_edit_str = st.selectbox("Выберите питомца для изменения данных:", animal_options, key="select_edit")
+                
+                edit_idx = animal_options.index(selected_edit_str)
+                current_pet = animals[edit_idx]
+                
+                st.write(f"✍️ Вы редактируете профиль подопечного: **{current_pet['name']}**")
+                
+                # 2. Создаем форму, куда ЗАРАНЕЕ подставляем текущие значения из базы (через value)
+                with st.form("edit_animal_form"):
+                    edit_name = st.text_input("Кличка животного", value=current_pet.get("name", ""))
+                    
+                    # Находим индекс старого типа в списке, чтобы он выбрался по умолчанию
+                    type_list = ["Собака", "Кошка", "Другое"]
+                    try: type_idx = type_list.index(current_pet.get("type", "Собака"))
+                    except: type_idx = 0
+                    edit_type = st.selectbox("Кто это?", type_list, index=type_idx)
+                    
+                    status_list = ["В отлове (Срочный вывоз!)", "На временной передержке", "Живет на улице (Нужна помощь)"]
+                    try: status_idx = status_list.index(current_pet.get("status", "На временной передержке"))
+                    except: status_idx = 1
+                    edit_status = st.selectbox("Текущий статус / Где находится?", status_list, index=status_idx)
+                    
+                    edit_age = st.text_input("Примерный возраст", value=current_pet.get("age", ""))
+                    edit_needs = st.text_input("В чем нуждается?", value=current_pet.get("needs", ""))
+                    edit_desc = st.text_area("Описание ситуации / Характер", value=current_pet.get("desc", ""))
+                    
+                    st.info("💡 Если хотите поменять фотографию — загрузите новую ниже. Если оставите поле пустым, сохранится старое фото.")
+                    edit_file = st.file_uploader("Загрузить новую фотографию (необязательно)", type=["jpg", "jpeg", "png"], key="edit_upload")
+                    
+                    save_changes = st.form_submit_button("💾 Сохранить изменения")
+                    
+                    if save_changes:
+                        if edit_name and edit_desc:
+                            # Если загрузили новую фотку — конвертируем её. Если нет — берем старую из базы
+                            if edit_file is not None:
+                                final_img = file_to_base64(edit_file)
+                            else:
+                                final_img = current_pet.get("img")
+                                
+                            # Перезаписываем данные в списке
+                            st.session_state.animals_list[edit_idx] = {
+                                "name": edit_name,
+                                "type": edit_type,
+                                "status": edit_status,
+                                "age": edit_age,
+                                "needs": edit_needs,
+                                "desc": edit_desc,
+                                "img": final_img
+                            }
+                            
+                            save_animals(st.session_state.animals_list)
+                            st.success(f"📈 Данные для {edit_name} успешно обновлены!")
+                            st.rerun()
+                        else:
+                            st.error("Кличка и описание не могут быть пустыми.")
+        
+        # --- ВКЛАДКА 3: УДАЛЕНИЕ ---
+        with tab3:
             st.subheader("Удаление питомцев с сайта")
             animals = st.session_state.animals_list
             
             if not animals:
                 st.info("На сайте пока нет добавленных животных.")
             else:
-                animal_options = [f"{pet['name']} ({pet['type']}) — {pet['status']}" for pet in animals]
-                selected_animal_str = st.selectbox("Выберите животное для удаления:", animal_options)
+                animal_options_del = [f"{pet['name']} ({pet['type']}) — {pet['status']}" for pet in animals]
+                selected_animal_str = st.selectbox("Выберите животное для удаления:", animal_options_del, key="select_del")
                 
-                selected_idx = animal_options.index(selected_animal_str)
+                selected_idx = animal_options_del.index(selected_animal_str)
                 selected_pet = animals[selected_idx]
                 
                 st.warning(f"Вы собираетесь удалить подопечного: **{selected_pet['name']}**.")
