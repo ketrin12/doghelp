@@ -172,41 +172,78 @@ elif menu == "Панель управления":
     if password == "admin123":
         st.success("Доступ разрешен!")
         
-        with st.form("add_animal_form", clear_on_submit=True):
-            st.subheader("Добавление нового подопечного")
+        # Создаем две вкладки внутри админки для удобства
+        tab1, tab2 = st.tabs(["➕ Добавить питомца", "🗑️ Управление / Удаление"])
+        
+        # ВКЛАДКА 1: ДОБАВЛЕНИЕ
+        with tab1:
+            with st.form("add_animal_form", clear_on_submit=True):
+                st.subheader("Добавление нового подопечного")
+                
+                new_name = st.text_input("Кличка животного (или описание, если нет имени)")
+                new_type = st.selectbox("Кто это?", ["Собака", "Кошка", "Другое"])
+                new_status = st.selectbox("Текущий статус / Где находится?", [
+                    "В отлове (Срочный вывоз!)", 
+                    "На временной передержке", 
+                    "Живет на улице (Нужна помощь)"
+                ])
+                new_age = st.text_input("Примерный возраст (например: 5 месяцев, 1-2 года)")
+                new_needs = st.text_input("В чем нуждается? (например: Сбор на операцию, Ищет дом, Нужен корм)")
+                new_desc = st.text_area("Описание ситуации / Характер")
+                
+                new_img = st.text_input("Ссылка на фотографию (URL)", 
+                                        value="https://unsplash.com")
+                
+                submit = st.form_submit_button("Добавить на сайт")
+                
+                if submit:
+                    if new_name and new_desc:
+                        new_pet = {
+                            "name": new_name,
+                            "type": new_type,
+                            "status": new_status,
+                            "age": new_age,
+                            "needs": new_needs,
+                            "desc": new_desc,
+                            "img": new_img
+                        }
+                        st.session_state.animals_list.append(new_pet)
+                        save_animals(st.session_state.animals_list)
+                        st.success(f"🎉 {new_name} успешно добавлен на сайт!")
+                        st.rerun()  # Перезагружаем страницу, чтобы обновить списки везде
+                    else:
+                        st.error("Пожалуйста, введите кличку и описание.")
+        
+        # ВКЛАДКА 2: УДАЛЕНИЕ / АРХИВАЦИЯ
+        with tab2:
+            st.subheader("Удаление питомцев с сайта")
+            st.write("Если животное нашло дом или ситуация разрешилась, выберите его из списка ниже и нажмите кнопку удаления.")
             
-            new_name = st.text_input("Кличка животного (или описание, если нет имени)")
-            new_type = st.selectbox("Кто это?", ["Собака", "Кошка", "Другое"])
-            new_status = st.selectbox("Текущий статус / Где находится?", [
-                "В отлове (Срочный вывоз!)", 
-                "На временной передержке", 
-                "Живет на улице (Нужна помощь)"
-            ])
-            new_age = st.text_input("Примерный возраст (например: 5 месяцев, 1-2 года)")
-            new_needs = st.text_input("В чем нуждается? (например: Сбор на операцию, Ищет дом, Нужен корм)")
-            new_desc = st.text_area("Описание ситуации / Характер")
+            animals = st.session_state.animals_list
             
-            new_img = st.text_input("Ссылка на фотографию (URL)", 
-                                    value="https://unsplash.com")
-            
-            submit = st.form_submit_button("Добавить на сайт")
-            
-            if submit:
-                if new_name and new_desc:
-                    new_pet = {
-                        "name": new_name,
-                        "type": new_type,
-                        "status": new_status,
-                        "age": new_age,
-                        "needs": new_needs,
-                        "desc": new_desc,
-                        "img": new_img
-                    }
-                    st.session_state.animals_list.append(new_pet)
+            if not animals:
+                st.info("На сайте пока нет добавленных животных.")
+            else:
+                # Создаем список понятных названий для выпадающего списка: "Кличка (Тип) - Статус"
+                animal_options = [f"{pet['name']} ({pet['type']}) — {pet['status']}" for pet in animals]
+                
+                # Выбор животного для удаления
+                selected_animal_str = st.selectbox("Выберите животное для удаления:", animal_options)
+                
+                # Находим индекс выбранного животного
+                selected_idx = animal_options.index(selected_animal_str)
+                selected_pet = animals[selected_idx]
+                
+                st.warning(f"Вы собираетесь удалить подопечного: **{selected_pet['name']}**. Это действие нельзя отменить.")
+                
+                # Кнопка подтверждения удаления
+                if st.button(f"❌ Подтвердить удаление {selected_pet['name']}", key="delete_pet_btn"):
+                    # Удаляем из session_state и перезаписываем JSON
+                    removed_name = st.session_state.animals_list.pop(selected_idx)['name']
                     save_animals(st.session_state.animals_list)
-                    st.success(f"🎉 {new_name} успешно добавлен на сайт!")
-                else:
-                    st.error("Пожалуйста, введите кличку и описание.")
+                    
+                    st.success(f"🐾 {removed_name} успешно удален(а) с сайта!")
+                    st.rerun()  # Мгновенно обновляем интерфейс
                     
     elif password:
         st.error("Неверный пароль!")
