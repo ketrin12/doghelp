@@ -30,7 +30,7 @@ st.markdown("""
     
     /* 3. Кнопки (Приглушенный шалфейный) */
     .stButton>button {
-        background-color: #7FA998 !important;
+        background-color: #D3D3D3 !important;
         color: #F7F4F0 !important; 
         border-radius: 10px;
         border: 1px solid #2B2B2B;
@@ -38,7 +38,7 @@ st.markdown("""
         transition: 0.3s;
     }
     .stButton>button:hover {
-        background-color: #638A7A !important;
+        background-color: #D3D3D3 !important;
         color: white !important;
         border-color: #2B2B2B;
     }
@@ -52,7 +52,7 @@ st.markdown("""
     
     /* 5. Боковое меню */
     [data-testid="stSidebar"] {
-        background-color: #EFEBE4 !important; 
+        background-color: #D3D3D3 !important; 
     }
     [data-testid="stSidebar"] * {
         color: #2B2B2B !important;
