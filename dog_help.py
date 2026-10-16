@@ -3,27 +3,22 @@ import json
 import os
 import base64
 
-# 1. Настройка страницы и темы (Белый фон, зеленые элементы)
+# 1. Настройка страницы и темы
 st.set_page_config(
     page_title="Помощь хвостикам — Передержка и ОСВВ",
     page_icon="🐾",
     layout="wide"
 )
 
-# Кастомные стили для изменения цвета кнопок и шрифтов на зеленый
+# Кастомные стили (Палитра Татьяны)
 st.markdown("""
     <style>
-    /* Основной фон сайта — Мягкий кремово-бежевый */
     .stApp {
         background-color: #F7F4F0 !important;
     }
-    
-    /* Цвет главного текста и заголовков — Глубокий хвойно-зеленый */
     h1, h2, h3, p, span, label, .stMarkdown {
         color: #2F3E36 !important;
     }
-    
-    /* Главные кнопки — Приглушенный шалфейный */
     .stButton>button {
         background-color: #7FA998 !important;
         color: #F7F4F0 !important; 
@@ -32,20 +27,14 @@ st.markdown("""
         font-weight: bold;
         transition: 0.3s;
     }
-    
-    /* Эффект при наведении на кнопку (Ховер) */
     .stButton>button:hover {
         background-color: #638A7A !important;
         color: white !important;
         border-color: #2F3E36;
     }
-    
-    /* Подправка стиля бокового меню */
     .stSidebar {
         background-color: #EFEBE4 !important; 
     }
-    
-    /* Стили для статусов животных */
     .status-badge {
         padding: 4px 10px;
         border-radius: 5px;
@@ -62,7 +51,7 @@ st.markdown("""
 
 DB_FILE = "animals.json"
 
-# Функция для конвертации загруженного файла в строку, чтобы сохранить в JSON
+# Конвертация загруженного через «Обзор» файла в формат для сохранения
 def file_to_base64(uploaded_file):
     if uploaded_file is not None:
         file_bytes = uploaded_file.read()
@@ -70,26 +59,33 @@ def file_to_base64(uploaded_file):
         return f"data:image/jpeg;base64,{encoded}"
     return "https://unsplash.com"
 
+# Безопасная загрузка базы данных
 def load_animals():
     if os.path.exists(DB_FILE):
         try:
             with open(DB_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
+                data = json.load(f)
+                # Если в базе остались старые локальные пути, очищаем её для защиты от вылетов
+                for item in data:
+                    if "pagesdog2/" in item["img"] or "images/" in item["img"]:
+                        return []
+                return data
         except:
             return []
     return []
-
-# Загружаем текущий список животных
-if 'animals_list' not in st.session_state:
-    st.session_state.animals_list = load_animals()
 
 def save_animals(data):
     with open(DB_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-# 3. Боковое меню (Sidebar) для навигации
+# Инициализация списка животных
+if 'animals_list' not in st.session_state:
+    st.session_state.animals_list = load_animals()
+
+# Меню навигации
 menu = st.sidebar.radio("Навигация по сайту", ["Главная (Питомцы)", "Помочь хвостикам", "Панель управления", "О нас"])
 
+# === СТРАНИЦА 1: ГЛАВНАЯ ===
 if menu == "Главная (Питомцы)":
     st.title("🐾 Помощь животным: Передержка и спасение")
     st.write("Здесь собраны подопечные, которым нужна помощь прямо сейчас.")
@@ -97,7 +93,7 @@ if menu == "Главная (Питомцы)":
     animals = st.session_state.animals_list
 
     if not animals:
-        st.info("Сейчас на сайте нет объявлений. Татьяна может добавить первого пушистика через Панель управления! 🥰")
+        st.info("Сейчас на сайте нет объявлений. Добавьте первого хвостика через Панель управления! 🥰")
     else:
         for i in range(0, len(animals), 3):
             cols = st.columns(3)
@@ -107,8 +103,11 @@ if menu == "Главная (Питомцы)":
                     with cols[j]:
                         item = animals[idx]
                         
-                        # Безопасно выводим картинку (хоть из интернета, хоть загруженную через Обзор)
-                        st.image(item["img"], use_container_width=True)
+                        # Защищенный вывод картинки
+                        try:
+                            st.image(item["img"], use_container_width=True)
+                        except Exception:
+                            st.warning("⚠️ Не удалось загрузить фото этого питомца")
                         
                         status = item.get("status", "На временной передержке")
                         if "отлове" in status:
@@ -126,7 +125,7 @@ if menu == "Главная (Питомцы)":
                             st.warning(f"⚠️ **Актуально:** {item['needs']}")
 
                         if st.button(f"Помочь / Забрать {item['name']}", key=f"btn_{idx}"):
-                            st.success(f"Спасибо за отклик! Перейдите во вкладку 'Помочь хвостикам' или 'О нас', чтобы связаться с куратором Татьяной.")
+                            st.success(f"Спасибо за отклик! Свяжитесь с куратором во вкладке 'О нас' или перейдите в раздел 'Помочь хвостикам'.")
                         st.markdown("---")
 
 # === СТРАНИЦА 2: ПОМОЩЬ ===
@@ -148,7 +147,7 @@ elif menu == "Помочь хвостикам":
 
 # === СТРАНИЦА 3: ПАНЕЛЬ УПРАВЛЕНИЯ ===
 elif menu == "Панель управления":
-    st.title("🔒 Вход в память управления")
+    st.title("🔒 Вход в панель управления")
     
     password = st.text_input("Введите пароль администратора", type="password")
     
@@ -169,17 +168,16 @@ elif menu == "Панель управления":
                     "Живет на улице (Нужна помощь)"
                 ])
                 new_age = st.text_input("Примерный возраст")
-                new_needs = st.text_input("В чем нуждается? (например: Сбор на корм, Нужна передержка)")
+                new_needs = st.text_input("В чем нуждается? (например: Сбор на корм, Нужен дом)")
                 new_desc = st.text_area("Описание ситуации / Характер")
                 
-                # ВОТ ОНА — НАША КНОПКА «ОБЗОР»!
-                uploaded_file = st.file_uploader("Выберите фото питомца с компьютера/телефона", type=["jpg", "jpeg", "png"])
+                # Кнопка ОБЗОР для загрузки картинок с ПК/телефона
+                uploaded_file = st.file_uploader("Выберите фото питомца", type=["jpg", "jpeg", "png"])
                 
                 submit = st.form_submit_button("Добавить на сайт")
                 
                 if submit:
                     if new_name and new_desc:
-                        # Превращаем картинку из проводника в текст для базы данных
                         img_data = file_to_base64(uploaded_file)
                         
                         new_pet = {
