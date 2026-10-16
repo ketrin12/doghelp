@@ -10,7 +10,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Кастомные стили с перекраской реквизитов и белой стрелочкой меню
+# Кастомные стили с перекраской реквизитов и БЕЛОЙ кнопкой меню на телефонах
 st.markdown("""
     <style>
     html, body, [data-testid="stAppViewContainer"], .stApp {
@@ -23,7 +23,7 @@ st.markdown("""
         background-color: #F7F4F0 !important;
     }
     
-    /* 2. Цвет обычного текста на сайте (возвращаем четкий черный) */
+    /* 2. Цвет текста на сайте (четкий черный) */
     h1, h2, h3, p, span, label, li, .stMarkdown, [data-testid="stWidgetLabel"] p, [data-testid="stMarkdownContainer"] p {
         color: #000000 !important;
     }
@@ -43,29 +43,31 @@ st.markdown("""
         border-color: #000000;
     }
     
-    /* 4. ИЗМЕНЯЕМ КВАДРАТИК С ПОЖЕРТВОВАНИЕМ (st.code) */
-    /* Делаем фон мягким зеленым, а текст внутри — строго черным и крупным */
+    /* 4. Квадратик с пожертвованием (st.code) — светло-зеленый */
     code, pre, [data-testid="stCodeBlock"] pre {
-        background-color: #E2F0D9 !important; /* Светло-шалфейный фон вместо черного */
-        color: #000000 !important;          /* Черный цвет текста реквизитов */
+        background-color: #E2F0D9 !important; 
+        color: #000000 !important;          
         border: 1px solid #7FA998 !important;
         border-radius: 8px !important;
         font-weight: bold !important;
     }
     
-    /* 5. ДЕЛАЕМ СТРЕЛОЧКУ БОКОВОГО МЕНЮ БЕЛОЙ */
-    /* На телефонах кнопка открытия меню станет ярко-белой и заметной */
+    /* 5. ПОЛНАЯ ПЕРЕКРАСКА КНОПКИ МЕНЮ НА ТЕЛЕФОНЕ (Рычаг >>) */
+    /* Делаем сам круг полностью БЕЛЫМ, чтобы убрать черный цвет */
     [data-testid="stSidebarCollapseButton"] button {
-        background-color: #7FA998 !important; /* Зеленый кружок вокруг стрелочки */
-        color: #FFFFFF !important;            /* Сама стрелочка белая */
-        border: 1px solid #2F3E36 !important;
-    }
-    [data-testid="stSidebarCollapseButton"] svg {
-        fill: #FFFFFF !important;             /* Заливка иконки стрелочки белым */
-        color: #FFFFFF !important;
+        background-color: #FFFFFF !important; /* Белый круг кнопки */
+        color: #7FA998 !important;            /* Цвет контура стрелочки */
+        border: 2px solid #7FA998 !important; /* Красивый шалфейный ободок вокруг кнопки */
+        box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.15) !important; /* Легкая тень, чтобы кнопка парила */
     }
     
-    /* 6. Поля ввода (Белый фон, черный текст внутри) */
+    /* Красим саму иконку стрелочки (>> или >) внутри круга в шалфейный цвет */
+    [data-testid="stSidebarCollapseButton"] svg {
+        fill: #7FA998 !important;             
+        color: #7FA998 !important;
+    }
+    
+    /* 6. Поля ввода (Белый фон, черный text) */
     .stTextInput input, .stSelectbox div, .stTextArea textarea {
         background-color: #FFFFFF !important;
         color: #000000 !important;
