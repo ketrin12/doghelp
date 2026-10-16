@@ -10,7 +10,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Кастомные стили с контрастным тёмно-серым текстом для читаемости
+# Кастомные стили с НАСТОЯЩИМ серым цветом для текста
 st.markdown("""
     <style>
     html, body, [data-testid="stAppViewContainer"], .stApp {
@@ -23,42 +23,42 @@ st.markdown("""
         background-color: #F7F4F0 !important;
     }
     
-    /* 2. Цвет текста — Делаем глубоким тёмно-серым (#2B2B2B) для максимального контраста */
-    h1, h2, h3, p, span, label, li, .stMarkdown, [data-testid="stWidgetLabel"] p {
-        color: #2B2B2B !important;
+    /* 2. Цвет текста — Делаем его выразительно СЕРЫМ (#606A64) */
+    h1, h2, h3, p, span, label, li, .stMarkdown, [data-testid="stWidgetLabel"] p, [data-testid="stMarkdownContainer"] p {
+        color: #606A64 !important;
     }
     
     /* 3. Кнопки (Приглушенный шалфейный) */
     .stButton>button {
-        background-color: #D3D3D3 !important;
+        background-color: #7FA998 !important;
         color: #F7F4F0 !important; 
         border-radius: 10px;
-        border: 1px solid #2B2B2B;
+        border: 1px solid #606A64;
         font-weight: bold;
         transition: 0.3s;
     }
     .stButton>button:hover {
-        background-color: #D3D3D3 !important;
+        background-color: #638A7A !important;
         color: white !important;
-        border-color: #2B2B2B;
+        border-color: #606A64;
     }
     
-    /* 4. Поля ввода (Белый фон, тёмно-серый текст внутри) */
+    /* 4. Поля ввода (Белый фон, серый текст внутри) */
     .stTextInput input, .stSelectbox div, .stTextArea textarea {
         background-color: #FFFFFF !important;
-        color: #2B2B2B !important;
+        color: #606A64 !important;
         border: 1px solid #7FA998 !important;
     }
     
     /* 5. Боковое меню */
     [data-testid="stSidebar"] {
-        background-color: #D3D3D3 !important; 
+        background-color: #EFEBE4 !important; 
     }
     [data-testid="stSidebar"] * {
-        color: #2B2B2B !important;
+        color: #606A64 !important;
     }
     
-    /* Стили для статусов животных */
+    /* Стили для statuses */
     .status-badge {
         padding: 4px 10px;
         border-radius: 5px;
