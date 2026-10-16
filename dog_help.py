@@ -1,6 +1,7 @@
 import streamlit as st
 import json
 import os
+import base64
 
 # 1. Настройка страницы и темы (Белый фон, зеленые элементы)
 st.set_page_config(
@@ -12,17 +13,17 @@ st.set_page_config(
 # Кастомные стили для изменения цвета кнопок и шрифтов на зеленый
 st.markdown("""
     <style>
-    /* 1. Основной фон сайта (60%) — Мягкий кремово-бежевый */
+    /* Основной фон сайта — Мягкий кремово-бежевый */
     .stApp {
         background-color: #F7F4F0 !important;
     }
     
-    /* 2. Цвет главного текста и заголовков (30%) — Глубокий хвойно-зеленый */
+    /* Цвет главного текста и заголовков — Глубокий хвойно-зеленый */
     h1, h2, h3, p, span, label, .stMarkdown {
         color: #2F3E36 !important;
     }
     
-    /* 3. Главные кнопки (10%) — Приглушенный шалфейный */
+    /* Главные кнопки — Приглушенный шалфейный */
     .stButton>button {
         background-color: #7FA998 !important;
         color: #F7F4F0 !important; 
@@ -32,7 +33,7 @@ st.markdown("""
         transition: 0.3s;
     }
     
-    /* 4. Эффект при наведении на кнопку (Ховер) */
+    /* Эффект при наведении на кнопку (Ховер) */
     .stButton>button:hover {
         background-color: #638A7A !important;
         color: white !important;
@@ -59,46 +60,44 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 2. База данных во временном файле JSON
 DB_FILE = "animals.json"
+
+# Функция для конвертации загруженного файла в строку, чтобы сохранить в JSON
+def file_to_base64(uploaded_file):
+    if uploaded_file is not None:
+        file_bytes = uploaded_file.read()
+        encoded = base64.b64encode(file_bytes).decode("utf-8")
+        return f"data:image/jpeg;base64,{encoded}"
+    return "https://unsplash.com"
 
 def load_animals():
     if os.path.exists(DB_FILE):
-        with open(DB_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    
-        # Стартовые данные с правильным путем к папке на GitHub
-    return [
-        {
-            "name": "Чебурашка",
-            "type": "Собака",
-            "status": "Живет на улице (Нужна помощь)",
-            "age": "2 года",
-            "needs": "Запланирована стерилизация, очень нужен дом или передержка!",
-            "desc": "Девочка, среднего размера. Живёт на улице, где каждый день грозит опасность. Очень ласковая и ждет свою семью.",
-            "img": "pagesdog2/cheburashka.jpg"  # Исправили имя папки под твой GitHub
-        }
-    ]
-
-def save_animals(data):
-    with open(DB_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+        try:
+            with open(DB_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except:
+            return []
+    return []
 
 # Загружаем текущий список животных
 if 'animals_list' not in st.session_state:
     st.session_state.animals_list = load_animals()
+
+def save_animals(data):
+    with open(DB_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
 
 # 3. Боковое меню (Sidebar) для навигации
 menu = st.sidebar.radio("Навигация по сайту", ["Главная (Питомцы)", "Помочь хвостикам", "Панель управления", "О нас"])
 
 if menu == "Главная (Питомцы)":
     st.title("🐾 Помощь животным: Передержка и спасение")
-    st.write("Здесь собраны подопечные, которым нужна помощь прямо сейчас: кто-то находится в отлове, кто-то на временных домашних передержках, а кто-то всё еще выживает на улице.")
+    st.write("Здесь собраны подопечные, которым нужна помощь прямо сейчас.")
 
     animals = st.session_state.animals_list
 
     if not animals:
-        st.info("Сейчас все животные под надежной защитой или нашли свой дом! 🥰")
+        st.info("Сейчас на сайте нет объявлений. Татьяна может добавить первого пушистика через Панель управления! 🥰")
     else:
         for i in range(0, len(animals), 3):
             cols = st.columns(3)
@@ -107,9 +106,10 @@ if menu == "Главная (Питомцы)":
                 if idx < len(animals):
                     with cols[j]:
                         item = animals[idx]
+                        
+                        # Безопасно выводим картинку (хоть из интернета, хоть загруженную через Обзор)
                         st.image(item["img"], use_container_width=True)
                         
-                        # Отображение статуса животного с красивым стилем
                         status = item.get("status", "На временной передержке")
                         if "отлове" in status:
                             st.markdown(f'<div class="status-badge status-otlov">🚨 {status}</div>', unsafe_allow_html=True)
@@ -126,13 +126,13 @@ if menu == "Главная (Питомцы)":
                             st.warning(f"⚠️ **Актуально:** {item['needs']}")
 
                         if st.button(f"Помочь / Забрать {item['name']}", key=f"btn_{idx}"):
-                            st.success(f"Спасибо за отклик! Перейдите во вкладку 'Помочь хвостикам' для перевода средств или в 'О нас', чтобы связаться с куратором Татьяной.")
+                            st.success(f"Спасибо за отклик! Перейдите во вкладку 'Помочь хвостикам' или 'О нас', чтобы связаться с куратором Татьяной.")
                         st.markdown("---")
 
 # === СТРАНИЦА 2: ПОМОЩЬ ===
 elif menu == "Помочь хвостикам":
     st.title("💚 Поддержать подопечных и передержку")
-    st.write("У нас нет стационарного здания приюта. Все средства идут точечно на спасение животных из отлова, оплату временных домашних передержек, лечение уличных хвостиков и покупку корма.")
+    st.write("Все средства идут точечно на спасение животных из отлова, оплату временных передержек и лечение.")
     
     st.info("ℹ️ Все поступающие средства идут напрямую на покупку корма, лекарств и оплату ветеринаров.")
     
@@ -143,44 +143,45 @@ elif menu == "Помочь хвостикам":
         st.code("Код ЕРИП: 1234567 (Благотворительность -> Помощь животным)")
     with col2:
         st.subheader("📞 Другие способы помощи")
-        st.write("Вы можете помочь руками, передать корм, лекарства (обработчики от клещей/глистов) или помочь с автопомощью (отвезти хвостика в клинику).")
+        st.write("Вы можете помочь руками, передать корм, лекарства или помочь с автопомощью.")
         st.write("**Телефон куратора:** +375 (29) XXX-XX-XX (Татьяна)")
 
 # === СТРАНИЦА 3: ПАНЕЛЬ УПРАВЛЕНИЯ ===
 elif menu == "Панель управления":
-    st.title("🔒 Вход в панель управления")
+    st.title("🔒 Вход в память управления")
     
     password = st.text_input("Введите пароль администратора", type="password")
     
     if password == "admin123":
         st.success("Доступ разрешен!")
         
-        # Создаем две вкладки внутри админки для удобства
         tab1, tab2 = st.tabs(["➕ Добавить питомца", "🗑️ Управление / Удаление"])
         
-        # ВКЛАДКА 1: ДОБАВЛЕНИЕ
         with tab1:
             with st.form("add_animal_form", clear_on_submit=True):
                 st.subheader("Добавление нового подопечного")
                 
-                new_name = st.text_input("Кличка животного (или описание, если нет имени)")
+                new_name = st.text_input("Кличка животного")
                 new_type = st.selectbox("Кто это?", ["Собака", "Кошка", "Другое"])
                 new_status = st.selectbox("Текущий статус / Где находится?", [
                     "В отлове (Срочный вывоз!)", 
                     "На временной передержке", 
                     "Живет на улице (Нужна помощь)"
                 ])
-                new_age = st.text_input("Примерный возраст (например: 5 месяцев, 1-2 года)")
-                new_needs = st.text_input("В чем нуждается? (например: Сбор на операцию, Ищет дом, Нужен корм)")
+                new_age = st.text_input("Примерный возраст")
+                new_needs = st.text_input("В чем нуждается? (например: Сбор на корм, Нужна передержка)")
                 new_desc = st.text_area("Описание ситуации / Характер")
                 
-                new_img = st.text_input("Ссылка на фотографию (URL)", 
-                                        value="https://unsplash.com")
+                # ВОТ ОНА — НАША КНОПКА «ОБЗОР»!
+                uploaded_file = st.file_uploader("Выберите фото питомца с компьютера/телефона", type=["jpg", "jpeg", "png"])
                 
                 submit = st.form_submit_button("Добавить на сайт")
                 
                 if submit:
                     if new_name and new_desc:
+                        # Превращаем картинку из проводника в текст для базы данных
+                        img_data = file_to_base64(uploaded_file)
+                        
                         new_pet = {
                             "name": new_name,
                             "type": new_type,
@@ -188,45 +189,35 @@ elif menu == "Панель управления":
                             "age": new_age,
                             "needs": new_needs,
                             "desc": new_desc,
-                            "img": new_img
+                            "img": img_data
                         }
                         st.session_state.animals_list.append(new_pet)
                         save_animals(st.session_state.animals_list)
                         st.success(f"🎉 {new_name} успешно добавлен на сайт!")
-                        st.rerun()  # Перезагружаем страницу, чтобы обновить списки везде
+                        st.rerun()
                     else:
                         st.error("Пожалуйста, введите кличку и описание.")
         
-        # ВКЛАДКА 2: УДАЛЕНИЕ / АРХИВАЦИЯ
         with tab2:
             st.subheader("Удаление питомцев с сайта")
-            st.write("Если животное нашло дом или ситуация разрешилась, выберите его из списка ниже и нажмите кнопку удаления.")
-            
             animals = st.session_state.animals_list
             
             if not animals:
                 st.info("На сайте пока нет добавленных животных.")
             else:
-                # Создаем список понятных названий для выпадающего списка: "Кличка (Тип) - Статус"
                 animal_options = [f"{pet['name']} ({pet['type']}) — {pet['status']}" for pet in animals]
-                
-                # Выбор животного для удаления
                 selected_animal_str = st.selectbox("Выберите животное для удаления:", animal_options)
                 
-                # Находим индекс выбранного животного
                 selected_idx = animal_options.index(selected_animal_str)
                 selected_pet = animals[selected_idx]
                 
-                st.warning(f"Вы собираетесь удалить подопечного: **{selected_pet['name']}**. Это действие нельзя отменить.")
+                st.warning(f"Вы собираетесь удалить подопечного: **{selected_pet['name']}**.")
                 
-                # Кнопка подтверждения удаления
                 if st.button(f"❌ Подтвердить удаление {selected_pet['name']}", key="delete_pet_btn"):
-                    # Удаляем из session_state и перезаписываем JSON
-                    removed_name = st.session_state.animals_list.pop(selected_idx)['name']
+                    st.session_state.animals_list.pop(selected_idx)
                     save_animals(st.session_state.animals_list)
-                    
-                    st.success(f"🐾 {removed_name} успешно удален(а) с сайта!")
-                    st.rerun()  # Мгновенно обновляем интерфейс
+                    st.success("Успешно удалено!")
+                    st.rerun()
                     
     elif password:
         st.error("Неверный пароль!")
@@ -234,18 +225,11 @@ elif menu == "Панель управления":
 # === СТРАНИЦА 4: О НАС ===
 elif menu == "О нас":
     st.title("🏢 О нашей волонтерской группе")
-
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("🌟 Наша миссия")
-        st.write(
-            "Мы не являемся государственным или классическим частным приютом. Мы — объединение волонтеров, "
-            "которые спасают животных из пунктов отлова, организуют временные домашние передержки, "
-            "занимаются лечением и социализацией уличных животных, а также реализуют программу гуманного регулирования "
-            "численности (ОСВВ: Отлов-Стерилизация-Вакцинация-Возврат)."
-        )
+        st.write("Мы — объединение волонтеров, которые спасают животных из пунктов отлова и организуют передержки.")
     with col2:
         st.subheader("📍 Контакты")
-        st.markdown("🌐 **Название:** Инициативная группа помощи животным")
         st.markdown("📞 **Телефон для связи:** +375 (29) XXX-XX-XX (Татьяна)")
         st.markdown("💬 **Telegram / Viber:** @tatyana_khvost_up")
