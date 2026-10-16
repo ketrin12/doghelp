@@ -10,7 +10,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Кастомные стили с НАСТОЯЩИМ серым цветом для текста
+# Кастомные стили с перекраской реквизитов и белой стрелочкой меню
 st.markdown("""
     <style>
     html, body, [data-testid="stAppViewContainer"], .stApp {
@@ -23,9 +23,9 @@ st.markdown("""
         background-color: #F7F4F0 !important;
     }
     
-    /* 2. Цвет текста — Делаем его выразительно СЕРЫМ (#606A64) */
+    /* 2. Цвет обычного текста на сайте (возвращаем четкий черный) */
     h1, h2, h3, p, span, label, li, .stMarkdown, [data-testid="stWidgetLabel"] p, [data-testid="stMarkdownContainer"] p {
-        color: #606A64 !important;
+        color: #000000 !important;
     }
     
     /* 3. Кнопки (Приглушенный шалфейный) */
@@ -33,32 +33,54 @@ st.markdown("""
         background-color: #7FA998 !important;
         color: #F7F4F0 !important; 
         border-radius: 10px;
-        border: 1px solid #606A64;
+        border: 1px solid #000000;
         font-weight: bold;
         transition: 0.3s;
     }
     .stButton>button:hover {
         background-color: #638A7A !important;
         color: white !important;
-        border-color: #606A64;
+        border-color: #000000;
     }
     
-    /* 4. Поля ввода (Белый фон, серый текст внутри) */
+    /* 4. ИЗМЕНЯЕМ КВАДРАТИК С ПОЖЕРТВОВАНИЕМ (st.code) */
+    /* Делаем фон мягким зеленым, а текст внутри — строго черным и крупным */
+    code, pre, [data-testid="stCodeBlock"] pre {
+        background-color: #E2F0D9 !important; /* Светло-шалфейный фон вместо черного */
+        color: #000000 !important;          /* Черный цвет текста реквизитов */
+        border: 1px solid #7FA998 !important;
+        border-radius: 8px !important;
+        font-weight: bold !important;
+    }
+    
+    /* 5. ДЕЛАЕМ СТРЕЛОЧКУ БОКОВОГО МЕНЮ БЕЛОЙ */
+    /* На телефонах кнопка открытия меню станет ярко-белой и заметной */
+    [data-testid="stSidebarCollapseButton"] button {
+        background-color: #7FA998 !important; /* Зеленый кружок вокруг стрелочки */
+        color: #FFFFFF !important;            /* Сама стрелочка белая */
+        border: 1px solid #2F3E36 !important;
+    }
+    [data-testid="stSidebarCollapseButton"] svg {
+        fill: #FFFFFF !important;             /* Заливка иконки стрелочки белым */
+        color: #FFFFFF !important;
+    }
+    
+    /* 6. Поля ввода (Белый фон, черный текст внутри) */
     .stTextInput input, .stSelectbox div, .stTextArea textarea {
         background-color: #FFFFFF !important;
-        color: #606A64 !important;
+        color: #000000 !important;
         border: 1px solid #7FA998 !important;
     }
     
-    /* 5. Боковое меню */
+    /* 7. Боковое меню */
     [data-testid="stSidebar"] {
         background-color: #EFEBE4 !important; 
     }
     [data-testid="stSidebar"] * {
-        color: #606A64 !important;
+        color: #000000 !important;
     }
     
-    /* Стили для statuses */
+    /* Стили для статусов животных */
     .status-badge {
         padding: 4px 10px;
         border-radius: 5px;
