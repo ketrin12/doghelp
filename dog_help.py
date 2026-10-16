@@ -10,22 +10,18 @@ st.set_page_config(
     layout="wide"
 )
 
-# Кастомные стили (Палитра Татьяны с полной адаптивностью под мобильные телефоны)
+# Кастомные стили (Палитра Татьяны с принудительной СВЕТЛОЙ темой)
 st.markdown("""
     <style>
-    /* Отключаем любые попытки телефона применить темную тему */
-    @media (prefers-color-scheme: dark) {
-        .stApp { background-color: #F7F4F0 !important; }
-    }
-    
-    /* 1. Главный фон сайта */
-    .stApp, [data-testid="stAppViewContainer"] {
+    /* ПРИКАЗ ДЛЯ СМАРТФОНОВ: ВКЛЮЧАТЬ ТОЛЬКО СВЕТЛУЮ ТЕМУ */
+    html, body, [data-testid="stAppViewContainer"], .stApp {
+        color-scheme: light !important;
         background-color: #F7F4F0 !important;
     }
     
-    /* 2. Цвет текста везде, включая мобильные подписи */
-    h1, h2, h3, p, span, label, li, .stMarkdown, [data-testid="stWidgetLabel"] p {
-        color: #2F3E36 !important;
+    /* 1. Основной фон сайта */
+    .stApp {
+        background-color: #F7F4F0 !important;
     }
     
     /* 3. Кнопки */
