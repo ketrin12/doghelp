@@ -92,59 +92,25 @@ DIN_KEY = "$2b$10$VvXwcc4/bInixOKdxGfgPOv64nA89l1ksvAiQJptNBGiERzIz5uOi"
 DIN_ID = "64d3679affd5d16053736a4f"
 DIN_URL = f"https://api.jsonbin.v3/b/{DIN_ID}"
 
+DB_FILE = "animals.json"
+
 def load_animals():
-    # 1. Проверяем локальный файл на сервере
+    # Просто читаем локальный файл, сайт будет летать мгновенно
     if os.path.exists(DB_FILE):
         try:
             with open(DB_FILE, "r", encoding="utf-8") as f:
                 return json.load(f)
         except:
-            pass
-            
-    # 2. Если файл стерся после перезагрузки Streamlit — качаем из резервного облака!
-    try:
-        headers = {"X-Master-Key": DIN_KEY}
-        response = requests.get(f"{DIN_URL}/latest", headers=headers)
-        if response.status_code == 200:
-            data = response.json()["record"]
-            # Сразу создаем файл локально, чтобы сайт летал
-            try:
-                with open(DB_FILE, "w", encoding="utf-8") as f:
-                    json.dump(data, f, ensure_ascii=False, indent=4)
-            except:
-                pass
-            return data
-    except:
-        pass
-        
+            return []
     return []
 
 def save_animals(data):
-    # 1. Сохраняем локально
+    # Просто сохраняем локально на сервере
     try:
         with open(DB_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
     except:
         pass
-        
-    # 2. Моментально дублируем в облако JSONBin
-    try:
-        headers = {
-            "Content-Type": "application/json",
-            "X-Master-Key": DIN_KEY
-        }
-        response = requests.put(DIN_URL, json=data, headers=headers)
-        
-        # ЕСЛИ СЕРВЕР ОТВЕТИЛ С ОШИБКОЙ, МЫ ЕЁ УВИДИМ:
-        if response.status_code != 200:
-            st.error(f"🚨 JSONBin Error ({response.status_code}): {response.text}")
-    except Exception as e:
-        # ЕСЛИ УПАЛ САМ ЗАПРОС, МЫ ТОЖЕ УВИДИМ:
-        st.error(f"🚨 Network Error: {e}")
-
-# Загружаем текущий список животных
-if 'animals_list' not in st.session_state:
-    st.session_state.animals_list = load_animals()
 
 # 1. Сначала идет сам словарь со всеми переводами (строка 108+)
 # ================= МУЛЬТИЯЗЫЧНОСТЬ =================
