@@ -190,6 +190,7 @@ if menu_idx == 0:
 
     # Кнопки-переключатели на самом верху страницы
         # Кнопки-переключатели на самом верху страницы
+    # Кнопки-переключатели на самом верху страницы
     selected_filter = st.segmented_control(
         "", 
         options=filter_options, 
@@ -198,62 +199,29 @@ if menu_idx == 0:
 
     # Фильтруем список
     filtered_animals = []
+    
+    # Узнаем, какую вкладку по счету нажал пользователь (0, 1 или 2)
+    try:
+        filter_idx = filter_options.index(selected_filter)
+    except:
+        filter_idx = 0  # Если что-то пошло не так, показываем "Все"
+
     for pet in st.session_state.animals_list:
         pet_cat = pet.get("age_category", "Взрослый питомец")
         
-        # Если выбрано "Все" или фильтр сброшен
-        if selected_filter == filter_options[0] or selected_filter is None:
+        # Индекс 0: Вкладка "Все"
+        if filter_idx == 0:
             filtered_animals.append(pet)
-        # Если выбрана вкладка Щенки
-        elif selected_filter == filter_options[1]:
+            
+        # Индекс 1: Вкладка "Щенки / Котята"
+        elif filter_idx == 1:
             if pet_cat == "Щенок / Котенок":
                 filtered_animals.append(pet)
-        # Если выбрана вкладка Взрослые
-        elif selected_filter == filter_options[2]:
+                
+        # Индекс 2: Вкладка "Взрослые питомцы"
+        elif filter_idx == 2:
             if pet_cat == "Взрослый питомец":
                 filtered_animals.append(pet)
-
-            if pet_cat == "Щенок / Котенок":
-                filtered_animals.append(pet)
-        else: # Выбрано "Взрослые"
-            if pet_cat == "Взрослый питомец":
-                filtered_animals.append(pet)
-
-    # Выводим на экран уже отфильтрованных животных
-    if not filtered_animals:
-        st.info("В этой категории сейчас нет подопечных. Посмотрите другие вкладки! 🥰")
-    else:
-        for i in range(0, len(filtered_animals), 3):
-            cols = st.columns(3)
-            for j in range(3):
-                idx = i + j
-                if idx < len(filtered_animals):
-                    with cols[j]:
-                        item = filtered_animals[idx]
-                        
-                        try:
-                            st.image(item["img"], use_container_width=True)
-                        except:
-                            st.warning("⚠️ Photo error")
-                        
-                        status = item.get("status", "На временной передержке")
-                        if "отлове" in status or "rescue" in status or "Tötung" in status:
-                            st.markdown(f'<div class="status-badge status-otlov">🚨 {status}</div>', unsafe_allow_html=True)
-                        elif "улице" in status or "street" in status or "Straße" in status:
-                            st.markdown(f'<div class="status-badge status-street">🏡 {status}</div>', unsafe_allow_html=True)
-                        else:
-                            st.markdown(f'<div class="status-badge status-perederzhka">🐾 {status}</div>', unsafe_allow_html=True)
-
-                        st.subheader(f"{item['name']} ({item.get('age', '')})")
-                        st.write(f"**{t['type']}:** {item.get('type', '')} | **{t['age_cat']}:** {item.get('age_category', 'Взрослый питомец')}")
-                        st.write(f"**{t['desc']}:** {item['desc']}")
-                        
-                        if item.get("needs"):
-                            st.warning(f"⚠️ **{t['needs']}:** {item['needs']}")
-
-                        if st.button(f"{t['btn_help']} {item['name']}", key=f"btn_{idx}"):
-                            st.success(t["alert_help"])
-                        st.markdown("---")
 
 # === СТРАНИЦА 1: ПОМОЩЬ ===
 elif menu_idx == 1:
