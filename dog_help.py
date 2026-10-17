@@ -95,26 +95,6 @@ if 'animals_list' not in st.session_state:
     st.session_state.animals_list = load_animals()
 
 # 1. Сначала идет сам словарь со всеми переводами (строка 108+)
-LANG_DICT = {
-    "Русский": {
-        # тут твои переводы...
-    },
-    "English": {
-        # тут твои переводы...
-    },
-    "Deutsch": {
-        # тут твои переводы...
-    }
-}
-
-# 2. И ТОЛЬКО ПОСЛЕ НЕГО идут эти строчки выбора языка:
-selected_lang = st.sidebar.selectbox("", ["Русский", "English", "Deutsch"], label_visibility="visible", index=0)
-t = LANG_DICT[selected_lang]
-
-menu_options = t["nav"]
-menu_choice = st.sidebar.radio(t["lang_label"], menu_options)
-menu_idx = menu_options.index(menu_choice)
-
 # ================= МУЛЬТИЯЗЫЧНОСТЬ =================
 LANG_DICT = {
     "Русский": {
@@ -163,6 +143,15 @@ LANG_DICT = {
         "age_cats": ["Welpe / Kätzchen", "Erwachsenes Tier"]
     }
 }
+
+# СЮДА ВСТАВЛЯЕМ ЭТИ СТРОЧКИ (ПОСЛЕ ЗАКРЫТИЯ СЛОВАРЯ!):
+selected_lang = st.sidebar.selectbox("", ["Русский", "English", "Deutsch"], label_visibility="visible", index=0)
+t = LANG_DICT[selected_lang]
+
+menu_options = t["nav"]
+menu_choice = st.sidebar.radio(t["lang_label"], menu_options)
+menu_idx = menu_options.index(menu_choice)
+
 
 selected_lang = st.sidebar.selectbox("", ["Русский", "English", "Deutsch"], label_visibility="visible", index=0)
 t = LANG_DICT[selected_lang]
