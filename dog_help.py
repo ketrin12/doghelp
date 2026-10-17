@@ -362,27 +362,33 @@ elif menu_idx == 2:
                 # ВОТ ЭТА СТРОКА ОБЯЗАТЕЛЬНО ДОЛЖНА БЫТЬ ТУТ:
                 submit = st.form_submit_button("Добавить на сайт")
                 
-                if submit:
-                    if new_name and new_desc:
-                        img_data = file_to_base64(uploaded_file)
-                        
-                        new_pet = {
-                            "name": new_name,
-                            "type": new_type,
-                            "age_category": new_age_cat,
-                            "status": new_status,
-                            "age": new_age,
-                            "needs": new_needs,
-                            "desc": new_desc,
-                            "img": img_data
-                        }
-                        st.session_state.animals_list.append(new_pet)
-                        
-                        # Сохраняем локально и в облако, затем обновляем
-                        save_animals(st.session_state.animals_list)
-                        st.rerun()
-                    else:
-                        st.error("Пожалуйста, введите кличку и описание.")
+        if submit:
+            if new_name and new_desc:
+                img_data = file_to_base64(uploaded_file)
+                
+                new_pet = {
+                    "name": new_name,
+                    "type": new_type,
+                    "age_category": new_age_cat,
+                    "status": new_status,
+                    "age": new_age,
+                    "needs": new_needs,
+                    "desc": new_desc,
+                    "img": img_data
+                }
+                
+                # Добавляем в локальную память (твоя строка 379)
+                st.session_state.animals_list.append(new_pet)
+                
+                # ==== ДОПИШИ ЭТОТ БЛОК НИЖЕ (СТРОКИ 380+) ====
+                st.write("🔄 Отправляем хвостика в облако...")
+                
+                # Вызываем нашу функцию сохранения
+                if save_animals(st.session_state.animals_list):
+                    st.success(f"🎉 Супер! {new_name} успешно сохранен в облако и не пропадет по F5!")
+                    st.balloons() # Бахнем шарики для радости 🎈
+                else:
+                    st.error("❌ Ошибка: В облако не записалось. Проверь интернет или ключи DIN_KEY/DIN_ID!")
 
         with tab2:
             st.subheader("📝 Редактирование")
