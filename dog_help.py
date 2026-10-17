@@ -288,7 +288,7 @@ elif menu_idx == 1:
         st.warning("🚨 **г. Речица, ул. Пролетарская, 118** — Пункт временного содержания (Сюда особенно необходима помощь теплыми вещами на подстилки и сухими кормами!)")
         
         st.markdown("---")
-        st.write("**Телефон куратора:** +375 (29) XXX-XX-XX (Татьяна)")
+        st.write("**Телефон куратора:** +375 (29) 665-84-22 (Татьяна)")
 
 # === СТРАНИЦА 2: ПОМОЩЬ ===
 elif menu_idx == 1:
@@ -305,7 +305,7 @@ elif menu_idx == 1:
     with col2:
         st.subheader("📞 Другие способы помощи")
         st.write("Вы можете помочь руками, передать корм, лекарства или помочь с автопомощью.")
-        st.write("**Телефон куратора:** +375 (29) XXX-XX-XX (Татьяна)")
+        st.write("**Телефон куратора:** +375 (29) 665-84-22 (Татьяна)")
 
 # === СТРАНИЦА 2: ПАНЕЛЬ УПРАВЛЕНИЯ ===
 elif menu_idx == 2:
@@ -430,7 +430,7 @@ elif menu_idx == 3:
             """)
         with col2:
             st.subheader("📍 Как с нами связаться?")
-            st.markdown("📞 **Телефон куратора:** +375 (29) XXX-XX-XX (Татьяна)")
+            st.markdown("**📞 Телефон куратора:** +375 (29) 665-84-22 (Татьяна)")
             st.markdown("💬 **Telegram / Viber:** @tatyana_khvost_up")
             st.markdown("📌 *Вы можете помочь руками, кормом или автопомощью. Каждый шаг важен!*")
             
@@ -447,7 +447,7 @@ elif menu_idx == 3:
         * **Foster Network:** Providing safe temporary housing, socialization, and medical care.
         * **Street Care & TNR:** Feeding stray animals, providing shelter boxes, and organizing Trap-Neuter-Return programs.
         """)
-        st.write("📞 **Contact Curator:** +375 (29) XXX-XX-XX (Tatyana)")
+        st.write("📞 **Contact Curator:** +375 (29) 665-84-22 (Tatyana)")
         
     else:  # Deutsch
         st.title("🏢 Über unsere Initiative 'Chwost-Up'")
@@ -462,4 +462,4 @@ elif menu_idx == 3:
         * **Pflegestellennetzwerk:** Sicherstellung eines sicheren Lebens in Familien, medizinische Versorgung und Sozialisierung.
         * **Straßenbetreuung:** Fütterung, Kastration und Impfung von Straßenhunden und -katzen.
         """)
-        st.write("📞 **Kontakt:** +375 (29) XXX-XX-XX (Tatyana)")
+        st.write("📞 **Kontakt:** +375 (29) 665-84-22 (Tatyana)")
