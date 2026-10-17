@@ -190,27 +190,24 @@ if menu_idx == 0:
 
 
     # 1. Исправляем дефолтное значение: выбираем ТОЛЬКО первую вкладку "Все" при старте
+    # 1. Кнопки-переключатели (проверь, чтобы default был равен filter_options[0])
     selected_filter = st.segmented_control(
         "", 
         options=filter_options, 
-        default=filter_options[0]  # Изменено: теперь выбрана только вкладка "Все", а не весь список
+        default=filter_options[0]  # Сюда обязательно добавь [0]
     )
 
-    # Фильтруем список
+    # 2. Создаем пустой список для отфильтрованных карточек
     filtered_animals = []
 
+    # 3. Запускаем цикл по исходной базе (animals_list)
     for pet in st.session_state.animals_list:
         pet_cat = pet.get("age_category", "Взрослый питомец")
         
-        # 1. Если вкладка "Все" или фильтр сброшен
+        # Строка 206 (проверь, чтобы тут тоже было [0] в конце!)
         if selected_filter is None or selected_filter == filter_options[0]:
             filtered_animals.append(pet)
-            
-        # 2. Если выбрана вкладка "Щенки / Котята"
-        elif selected_filter == filter_options[1]:
-            if pet_cat == "Щенок / Котенок":
-                filtered_animals.append(pet)
-                
+
         # 3. Если выбрана вкладка "Взрослые питомцы" (ИСПРАВЛЕНО 'if p' на 'if pet_cat')
         elif selected_filter == filter_options[2]:
             if pet_cat == "Взрослый питомец":
