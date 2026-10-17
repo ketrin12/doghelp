@@ -157,18 +157,50 @@ if menu_idx == 0:
     st.title(t["title_main"])
     st.write(t["subtitle_main"])
 
+    # Добавляем переводы для фильтра в зависимости от выбранного языка
+    if selected_lang == "Русский":
+        filter_options = ["Все", "Щенки / Котята (0-1 год)", "Взрослые питомцы (1+ лет)"]
+    elif selected_lang == "English":
+        filter_options = ["All", "Puppies / Kittens (0-1 year)", "Adult Pets (1+ years)"]
+    else:
+        filter_options = ["Alle", "Welpen / Kätzchen (0-1 Jahr)", "Erwachsene Tiere (1+ Jahre)"]
+
+    # Кнопки-переключатели на самом верху страницы
+    selected_filter = st.segmented_control(
+        "", 
+        options=filter_options, 
+        default=filter_options[0]
+    )
+
     animals = st.session_state.animals_list
 
-    if not animals:
-        st.info(t["no_animals"])
+    # Фильтруем список животных перед выводом на экран
+       # Фильтруем список животных перед выводом на экран
+    filtered_animals = []
+    for pet in animals:
+        pet_cat = pet.get("age_category", "Взрослый питомец")
+        pet_status = pet.get("status", "") # Безопасно получаем статус питомца
+        
+        if selected_filter == filter_options[0]: # Выбрано "Все"
+            filtered_animals.append(pet)
+        elif "Щенок" in selected_filter or "Puppy" in selected_filter or "Welpe" in selected_filter:
+            if pet_cat == "Щенок / Котенок":
+                filtered_animals.append(pet)
+        else: # Выбрано "Взрослые"
+            if pet_cat == "Взрослый питомец":
+                filtered_animals.append(pet)
+
+    # Выводим на экран уже отфильтрованных животных
+    if not filtered_animals:
+        st.info("В этой категории сейчас нет подопечных. Посмотрите другие вкладки! 🥰")
     else:
-        for i in range(0, len(animals), 3):
+        for i in range(0, len(filtered_animals), 3):
             cols = st.columns(3)
             for j in range(3):
                 idx = i + j
-                if idx < len(animals):
+                if idx < len(filtered_animals):
                     with cols[j]:
-                        item = animals[idx]
+                        item = filtered_animals[idx]
                         
                         try:
                             st.image(item["img"], use_container_width=True)
