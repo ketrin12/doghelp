@@ -87,59 +87,31 @@ DIN_URL = "https://api.jsonbin.v3/b/67110901e41b4d34e444bc30" # Эту ссыл�
 
 DB_FILE = "animals.json"
 
-# ================= НАСТРОЙКИ ОБЛАКА JSONBIN =================
-DIN_KEY = "$2a$10$VxXWcC4/bInixOKdXgfpgOv64nA89l1ksvAiQJptNBg1eRzIzSuOi"
+# Настройки твоего резервного облака
+DIN_KEY = "$2b$10$VvXwcc4/bInixOKdxGfgPOv64nA89l1ksvAiQJptNBGiERzIz5uOi"
 DIN_ID = "64d3679affd5d16053736a4f"
 DIN_URL = f"https://api.jsonbin.v3/b/{DIN_ID}"
 
+DB_FILE = "animals.json"
+
 def load_animals():
-    """Загружает список питомцев из облака JSONBin"""
-    headers = {
-        "X-Master-Key": DIN_KEY  # Используем строго DIN_KEY
-    }
-    try:
-        # Делаем запрос к актуальной версии данных
-        response = requests.get(f"{DIN_URL}/latest", headers=headers)
-        if response.status_code == 200:
-            res_data = response.json()
-            record_data = res_data.get("record", [])
-            
-            # Если это список (как на твоем скриншоте), отдаем его
-            if isinstance(record_data, list):
-                return record_data
-            # Если это одиночный объект, оборачиваем в список
-            elif isinstance(record_data, dict):
-                return [record_data]
-        
-        # Если сервер лег, берем локальный файл для резерва
-        with open("animals.json", "r", encoding="utf-8") as f:
-            local_data = json.load(f)
-            return local_data if isinstance(local_data, list) else []
-    except:
-        return []
+    # Читаем базу данных прямо из встроенных секретов сервера Streamlit Cloud
+    if "animals_db" in st.secrets:
+        try:
+            return json.loads(st.secrets["animals_db"])
+        except:
+            return []
+    return []
 
 def save_animals(data):
-    """Сохраняет список питомцев в облако JSONBin"""
-    # 1. Резервное сохранение в локальный файл
+    # В бесплатной версии Streamlit Cloud изменять секреты через код напрямую нельзя,
+    # поэтому мы выведем для Татьяны готовую кнопку «Скачать резервную копию», 
+    # либо ты сам сможешь раз в месяц закидывать текстовую строчку в настройки сайта.
     try:
         with open("animals.json", "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
     except:
         pass
-
-    # 2. Основное сохранение в JSONBin
-    headers = {
-        "Content-Type": "application/json",
-        "X-Master-Key": DIN_KEY  # Используем строго DIN_KEY
-    }
-    try:
-        # ИСПРАВЛЕНО: передаем 'json=data' вместо несуществующего 'json_data'
-        response = requests.put(DIN_URL, json=data, headers=headers, timeout=5)
-        if response.status_code == 200:
-            return True
-    except:
-        pass
-    return False
 
     # ИНИЦИАЛИЗАЦИЯ: Если списка еще нет в памяти, мы загружаем его из наших Secrets
 if 'animals_list' not in st.session_state:
@@ -362,33 +334,27 @@ elif menu_idx == 2:
                 # ВОТ ЭТА СТРОКА ОБЯЗАТЕЛЬНО ДОЛЖНА БЫТЬ ТУТ:
                 submit = st.form_submit_button("Добавить на сайт")
                 
-        if submit:
-            if new_name and new_desc:
-                img_data = file_to_base64(uploaded_file)
-                
-                new_pet = {
-                    "name": new_name,
-                    "type": new_type,
-                    "age_category": new_age_cat,
-                    "status": new_status,
-                    "age": new_age,
-                    "needs": new_needs,
-                    "desc": new_desc,
-                    "img": img_data
-                }
-                
-                # Добавляем в локальную память (твоя строка 379)
-                st.session_state.animals_list.append(new_pet)
-                
-                # ==== ДОПИШИ ЭТОТ БЛОК НИЖЕ (СТРОКИ 380+) ====
-                st.write("🔄 Отправляем хвостика в облако...")
-                
-                # Вызываем нашу функцию сохранения
-                if save_animals(st.session_state.animals_list):
-                    st.success(f"🎉 Супер! {new_name} успешно сохранен в облако и не пропадет по F5!")
-                    st.balloons() # Бахнем шарики для радости 🎈
-                else:
-                    st.error("❌ Ошибка: В облако не записалось. Проверь интернет или ключи DIN_KEY/DIN_ID!")
+                if submit:
+                    if new_name and new_desc:
+                        img_data = file_to_base64(uploaded_file)
+                        
+                        new_pet = {
+                            "name": new_name,
+                            "type": new_type,
+                            "age_category": new_age_cat,
+                            "status": new_status,
+                            "age": new_age,
+                            "needs": new_needs,
+                            "desc": new_desc,
+                            "img": img_data
+                        }
+                        st.session_state.animals_list.append(new_pet)
+                        
+                        # Сохраняем локально и в облако, затем обновляем
+                        save_animals(st.session_state.animals_list)
+                        st.rerun()
+                    else:
+                        st.error("Пожалуйста, введите кличку и описание.")
 
         with tab2:
             st.subheader("📝 Редактирование")
