@@ -197,19 +197,28 @@ if menu_idx == 0:
     )
 
     # Фильтруем список
+    # Фильтруем список
     filtered_animals = []
 
     for pet in st.session_state.animals_list:
         pet_cat = pet.get("age_category", "Взрослый питомец")
         
-        # 1. Если вкладка "Все" или фильтр сброшен
-        if selected_filter is None or selected_filter == filter_options[0]:
+        # Переводим выбранный фильтр в нижний регистр для безопасного поиска
+        current_filter = str(selected_filter).lower() if selected_filter else ""
+        
+        # 1. Если выбрана вкладка "Все" (или её аналоги на других языках) или фильтр сброшен
+        if not selected_filter or "все" in current_filter or "all" in current_filter or "alle" in current_filter:
             filtered_animals.append(pet)
             
-        # 2. Если выбрана вкладка "Щенки / Котята"
-        elif selected_filter == filter_options[1]:
+        # 2. Если в выбранной кнопке есть слово про щенков/котят
+        elif "щен" in current_filter or "pupp" in current_filter or "welp" in current_filter:
             if pet_cat == "Щенок / Котенок":
-             filtered_animals.append(pet)
+                filtered_animals.append(pet)
+                
+        # 3. Если в выбранной кнопке есть слово про взрослых питомцев
+        elif "взрос" in current_filter or "adult" in current_filter or "erwach" in current_filter:
+            if pet_cat == "Взрослый питомец":
+                filtered_animals.append(pet)
 
     # ================= ВСТАВЬ ЭТОТ БЛОК СЮДА (СТРОКИ 216-218) =================
     if not filtered_animals:
