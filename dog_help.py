@@ -113,6 +113,10 @@ def save_animals(data):
     except:
         pass
 
+    # ИНИЦИАЛИЗАЦИЯ: Если списка еще нет в памяти, мы загружаем его из наших Secrets
+if 'animals_list' not in st.session_state:
+    st.session_state.animals_list = load_animals()
+
 # 1. Сначала идет сам словарь со всеми переводами (строка 108+)
 # ================= МУЛЬТИЯЗЫЧНОСТЬ =================
 LANG_DICT = {
@@ -191,8 +195,6 @@ if menu_idx == 0:
         options=filter_options, 
         default=filter_options[0]  # По умолчанию выбрано "Все"
     )
-
-    animals = st.session_state.animals_list
 
     # Фильтруем список
     filtered_animals = []
