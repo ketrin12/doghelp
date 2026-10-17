@@ -94,23 +94,31 @@ DIN_ID = "64d3679affd5d16053736a4f"
 DIN_URL = f"https://api.jsonbin.v3/b/{DIN_ID}"
 
 def load_animals():
-    """Загружает список питомцев из облака JSONBin"""
+    """Загружает список питомцев из облака JSONBin с защитой от ошибок структуры"""
     headers = {
         "X-Master-Key": DIN_KEY
     }
     try:
-        # Добавляем /latest, чтобы всегда забирать самую свежую версию данных
+        # Запрашиваем самую последнюю версию данных
         response = requests.get(f"{DIN_URL}/latest", headers=headers)
         if response.status_code == 200:
             res_data = response.json()
-            # JSONBin возвращает данные внутри ключа "record"
-            return res_data.get("record", [])
-        else:
-            # Если облако ответило ошибкой, попробуем локальный файл (для подстраховки)
-            with open("animals.json", "r", encoding="utf-8") as f:
-                return json.load(f)
+            
+            # Достаем именно список из ключа "record"
+            record_data = res_data.get("record", [])
+            
+            # Проверяем: если это список, отдаем его
+            if isinstance(record_data, list):
+                return record_data
+            # Если в record лежит один словарь (как твоя тестовая запись), оборачиваем его в список
+            elif isinstance(record_data, dict):
+                return [record_data]
+                
+        # Если облако недоступно, пробуем подстраховаться локальным файлом
+        with open("animals.json", "r", encoding="utf-8") as f:
+            local_data = json.load(f)
+            return local_data if isinstance(local_data, list) else []
     except:
-        # Если и файла нет, возвращаем пустой список
         return []
 
 def save_animals(data):
