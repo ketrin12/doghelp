@@ -81,16 +81,16 @@ def file_to_base64(uploaded_file):
 DB_FILE = "animals.json"
 
 # Вставь сюда свой скопированный Master Key с сайта JSONBin
-BIN_KEY = "$2a$10$VxXWcC4/bInixOKdXgfpgOv64nA89l1ksvAiQJptNBg1eRzIzSuOi"
+DIN_KEY = "$2a$10$VxXWcC4/bInixOKdXgfpgOv64nA89l1ksvAiQJptNBg1eRzIzSuOi"
 # Ссылка на твою личную корзину (создастся автоматически при первом сохранении)
-BIN_URL = "https://api.jsonbin.v3/b/67110901e41b4d34e444bc30" # Эту ссылку мы обновим после первого теста
+DIN_URL = "https://api.jsonbin.v3/b/67110901e41b4d34e444bc30" # Эту ссылку мы обновим после первого теста
 
 DB_FILE = "animals.json"
 
 # Настройки твоего резервного облака
-BIN_KEY = "$2b$10$VvXwcc4/bInixOKdxGfgPOv64nA89l1ksvAiQJptNBGiERzIz5uOi"
-BIN_ID = "64d3679affd5d16053736a4f"
-BIN_URL = f"https://api.jsonbin.v3/b/{BIN_ID}"
+DIN_KEY = "$2b$10$VvXwcc4/bInixOKdxGfgPOv64nA89l1ksvAiQJptNBGiERzIz5uOi"
+DIN_ID = "64d3679affd5d16053736a4f"
+DIN_URL = f"https://api.jsonbin.v3/b/{DIN_ID}"
 
 def load_animals():
     # 1. Проверяем локальный файл на сервере
@@ -103,8 +103,8 @@ def load_animals():
             
     # 2. Если файл стерся после перезагрузки Streamlit — качаем из резервного облака!
     try:
-        headers = {"X-Master-Key": BIN_KEY}
-        response = requests.get(f"{BIN_URL}/latest", headers=headers)
+        headers = {"X-Master-Key": DIN_KEY}
+        response = requests.get(f"{DIN_URL}/latest", headers=headers)
         if response.status_code == 200:
             data = response.json()["record"]
             # Сразу создаем файл локально, чтобы сайт летал
@@ -131,9 +131,9 @@ def save_animals(data):
     try:
         headers = {
             "Content-Type": "application/json",
-            "X-Master-Key": BIN_KEY
+            "X-Master-Key": DIN_KEY
         }
-        requests.put(BIN_URL, json=data, headers=headers)
+        requests.put(DIN_URL, json=data, headers=headers)
     except:
         pass
 
