@@ -87,31 +87,53 @@ DIN_URL = "https://api.jsonbin.v3/b/67110901e41b4d34e444bc30" # Эту ссыл�
 
 DB_FILE = "animals.json"
 
-# Настройки твоего резервного облака
-DIN_KEY = "$2b$10$VvXwcc4/bInixOKdxGfgPOv64nA89l1ksvAiQJptNBGiERzIz5uOi"
+# ================= НАСТРОЙКИ ОБЛАКА JSONBIN (ИСПРАВЛЕНО ПО СКРИНШОТАМ) =================
+# Иван, я переписал ключи точь-в-точь как на твоем втором скриншоте!
+DIN_KEY = "$2a$10$VxXWcC4/bInixOKdXgfpgOv64nA89l1ksvAiQJptNBg1eRzIzSuOi"
 DIN_ID = "64d3679affd5d16053736a4f"
 DIN_URL = f"https://api.jsonbin.v3/b/{DIN_ID}"
 
-DB_FILE = "animals.json"
-
 def load_animals():
-    # Читаем базу данных прямо из встроенных секретов сервера Streamlit Cloud
-    if "animals_db" in st.secrets:
-        try:
-            return json.loads(st.secrets["animals_db"])
-        except:
-            return []
-    return []
+    """Загружает список питомцев из облака JSONBin"""
+    headers = {
+        "X-Master-Key": DIN_KEY
+    }
+    try:
+        # Добавляем /latest, чтобы всегда забирать самую свежую версию данных
+        response = requests.get(f"{DIN_URL}/latest", headers=headers)
+        if response.status_code == 200:
+            res_data = response.json()
+            # JSONBin возвращает данные внутри ключа "record"
+            return res_data.get("record", [])
+        else:
+            # Если облако ответило ошибкой, попробуем локальный файл (для подстраховки)
+            with open("animals.json", "r", encoding="utf-8") as f:
+                return json.load(f)
+    except:
+        # Если и файла нет, возвращаем пустой список
+        return []
 
 def save_animals(data):
-    # В бесплатной версии Streamlit Cloud изменять секреты через код напрямую нельзя,
-    # поэтому мы выведем для Татьяны готовую кнопку «Скачать резервную копию», 
-    # либо ты сам сможешь раз в месяц закидывать текстовую строчку в настройки сайта.
+    """Сохраняет список питомцев в облако JSONBin и локально"""
+    # 1. Сначала сохраняем локально, как у тебя и было
     try:
         with open("animals.json", "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
     except:
         pass
+
+    # 2. А теперь отправляем в JSONBin, чтобы данные никогда не стирались сервером!
+    headers = {
+        "Content-Type": "application/json",
+        "X-Master-Key": DIN_KEY
+    }
+    try:
+        response = requests.put(DIN_URL, json=data, headers=headers)
+        if response.status_code == 200:
+            return True
+    except:
+        pass
+    return False
 
     # ИНИЦИАЛИЗАЦИЯ: Если списка еще нет в памяти, мы загружаем его из наших Secrets
 if 'animals_list' not in st.session_state:
@@ -198,7 +220,7 @@ if menu_idx == 0:
 
     # Фильтруем список
     filtered_animals = []
-    for pet in st.session_state.animals_list:
+    for pet in "animals":
         pet_cat = pet.get("age_category", "Взрослый питомец")
         
         # Если выбрано "Все" или фильтр сброшен
