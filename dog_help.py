@@ -90,8 +90,12 @@ def save_animals(data):
     with open(DB_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
+# Загружаем текущий список животных
 if 'animals_list' not in st.session_state:
     st.session_state.animals_list = load_animals()
+
+# 3. Боковое меню (Sidebar) для навигации
+menu = st.sidebar.radio("Навигация по сайту", ["Главная (Питомцы)", "Помочь хвостикам", "Панель управления", "О нас"])
 
 # ================= МУЛЬТИЯЗЫЧНОСТЬ =================
 LANG_DICT = {
@@ -166,24 +170,32 @@ if menu_idx == 0:
         filter_options = ["Alle", "Welpen / Kätzchen (0-1 Jahr)", "Erwachsene Tiere (1+ Jahre)"]
 
     # Кнопки-переключатели на самом верху страницы
+        # Кнопки-переключатели на самом верху страницы
     selected_filter = st.segmented_control(
         "", 
         options=filter_options, 
-        default=filter_options[0]
+        default=filter_options[0]  # По умолчанию выбрано "Все"
     )
 
     animals = st.session_state.animals_list
 
-    # Фильтруем список животных перед выводом на экран
-       # Фильтруем список животных перед выводом на экран
+    # Фильтруем список
     filtered_animals = []
     for pet in animals:
         pet_cat = pet.get("age_category", "Взрослый питомец")
-        pet_status = pet.get("status", "") # Безопасно получаем статус питомца
         
-        if selected_filter == filter_options[0]: # Выбрано "Все"
+        # Если выбрано "Все" или фильтр сброшен
+        if selected_filter == filter_options[0] or selected_filter is None:
             filtered_animals.append(pet)
-        elif "Щенок" in selected_filter or "Puppy" in selected_filter or "Welpe" in selected_filter:
+        # Если выбрана вкладка Щенки
+        elif selected_filter == filter_options[1]:
+            if pet_cat == "Щенок / Котенок":
+                filtered_animals.append(pet)
+        # Если выбрана вкладка Взрослые
+        elif selected_filter == filter_options[2]:
+            if pet_cat == "Взрослый питомец":
+                filtered_animals.append(pet)
+
             if pet_cat == "Щенок / Котенок":
                 filtered_animals.append(pet)
         else: # Выбрано "Взрослые"
