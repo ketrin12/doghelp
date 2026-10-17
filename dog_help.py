@@ -87,34 +87,31 @@ DIN_URL = "https://api.jsonbin.v3/b/67110901e41b4d34e444bc30" # Эту ссыл�
 
 DB_FILE = "animals.json"
 
-# ================= НАСТРОЙКИ ОБЛАКА JSONBIN (ИСПРАВЛЕНО ПО СКРИНШОТАМ) =================
-# Иван, я переписал ключи точь-в-точь как на твоем втором скриншоте!
+# ================= НАСТРОЙКИ ОБЛАКА JSONBIN =================
 DIN_KEY = "$2a$10$VxXWcC4/bInixOKdXgfpgOv64nA89l1ksvAiQJptNBg1eRzIzSuOi"
 DIN_ID = "64d3679affd5d16053736a4f"
 DIN_URL = f"https://api.jsonbin.v3/b/{DIN_ID}"
 
 def load_animals():
-    """Загружает список питомцев из облака JSONBin с защитой от ошибок структуры"""
+    """Загружает список питомцев из облака JSONBin"""
     headers = {
-        "X-Master-Key": DIN_KEY
+        "X-Master-Key": DIN_KEY  # Используем строго DIN_KEY
     }
     try:
-        # Запрашиваем самую последнюю версию данных
+        # Делаем запрос к актуальной версии данных
         response = requests.get(f"{DIN_URL}/latest", headers=headers)
         if response.status_code == 200:
             res_data = response.json()
-            
-            # Достаем именно список из ключа "record"
             record_data = res_data.get("record", [])
             
-            # Проверяем: если это список, отдаем его
+            # Если это список (как на твоем скриншоте), отдаем его
             if isinstance(record_data, list):
                 return record_data
-            # Если в record лежит один словарь (как твоя тестовая запись), оборачиваем его в список
+            # Если это одиночный объект, оборачиваем в список
             elif isinstance(record_data, dict):
                 return [record_data]
-                
-        # Если облако недоступно, пробуем подстраховаться локальным файлом
+        
+        # Если сервер лег, берем локальный файл для резерва
         with open("animals.json", "r", encoding="utf-8") as f:
             local_data = json.load(f)
             return local_data if isinstance(local_data, list) else []
@@ -122,18 +119,18 @@ def load_animals():
         return []
 
 def save_animals(data):
-    """Сохраняет список питомцев в облако JSONBin и локально"""
-    # 1. Сначала сохраняем локально, как у тебя и было
+    """Сохраняет список питомцев в облако JSONBin"""
+    # 1. Резервное сохранение в локальный файл
     try:
         with open("animals.json", "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
     except:
         pass
 
-    # 2. А теперь отправляем в JSONBin, чтобы данные никогда не стирались сервером!
+    # 2. Основное сохранение в JSONBin
     headers = {
         "Content-Type": "application/json",
-        "X-Master-Key": DIN_KEY
+        "X-Master-Key": DIN_KEY  # Используем строго DIN_KEY
     }
     try:
         response = requests.put(DIN_URL, json=data, headers=headers)
