@@ -344,11 +344,31 @@ elif menu_idx == 2:
         tab1, tab2, tab3 = st.tabs(["➕ Добавить", "✏️ Редактировать", "🗑️ Удалить"])
         
         with tab1:
+            # Создаем форму для добавления питомца
+            with st.form("add_animal_form", clear_on_submit=True):
+                st.subheader("Добавление нового подопечного")
+                
+                new_name = st.text_input("Кличка животного")
+                new_type = st.selectbox("Кто это?", ["Собака", "Кошка", "Другое"])
+                new_age_cat = st.selectbox("Категория возраста", ["Щенок / Котенок", "Взрослый питомец"])
+                new_status = st.selectbox("Текущий статус / Где находится?", [
+                    "В отлове (Срочный вывоз!)", 
+                    "На временной передержке", 
+                    "Живет на улице (Нужна помощь)"
+                ])
+                new_age = st.text_input("Примерный возраст")
+                new_needs = st.text_input("В чем нуждается? (например: Сбор на корм, Нужен дом)")
+                new_desc = st.text_area("Описание ситуации / Характер")
+                
+                uploaded_file = st.file_uploader("Выберите фото питомца", type=["jpg", "jpeg", "png"], key="add_upload")
+                
+                # ВОТ ЭТА СТРОКА ОБЯЗАТЕЛЬНО ДОЛЖНА БЫТЬ ТУТ:
+                submit = st.form_submit_button("Добавить на сайт")
+                
                 if submit:
                     if new_name and new_desc:
                         img_data = file_to_base64(uploaded_file)
                         
-                        # Собираем данные в точной структуре
                         new_pet = {
                             "name": new_name,
                             "type": new_type,
@@ -359,14 +379,10 @@ elif menu_idx == 2:
                             "desc": new_desc,
                             "img": img_data
                         }
-                        
-                        # Добавляем в оперативную память сайта
                         st.session_state.animals_list.append(new_pet)
                         
+                        # Сохраняем локально и в облако, затем обновляем
                         save_animals(st.session_state.animals_list)
-                        st.rerun()
-                        
-                        st.success(f"🎉 {new_name} успешно добавлен на сайт!")
                         st.rerun()
                     else:
                         st.error("Пожалуйста, введите кличку и описание.")
