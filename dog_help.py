@@ -344,28 +344,33 @@ elif menu_idx == 2:
         tab1, tab2, tab3 = st.tabs(["➕ Добавить", "✏️ Редактировать", "🗑️ Удалить"])
         
         with tab1:
-            with st.form("add_form", clear_on_submit=True):
-                st.subheader("Добавление подопечного")
-                new_name = st.text_input("Кличка")
-                new_type = st.selectbox("Кто это?", ["Собака", "Кошка", "Другое"])
-                new_age_cat = st.selectbox("Категория возраста", ["Щенок / Котенок", "Взрослый питомец"])
-                new_status = st.selectbox("Статус", ["В отлове (Срочный вывоз!)", "На временной передержке", "Живет на улице (Нужна помощь)"])
-                new_age = st.text_input("Точный возраст (например: 5 месяцев, 2 года)")
-                new_needs = st.text_input("В чем нуждается?")
-                new_desc = st.text_area("Описание ситуации и характера")
-                uploaded_file = st.file_uploader("Выберите фото питомца", type=["jpg", "jpeg", "png"], key="add_up")
-                
-                if st.form_submit_button("Добавить"):
+                if submit:
                     if new_name and new_desc:
                         img_data = file_to_base64(uploaded_file)
-                        st.session_state.animals_list.append({
-                            "name": new_name, "type": new_type, "age_category": new_age_cat,
-                            "status": new_status, "age": new_age, "needs": new_needs, "desc": new_desc, "img": img_data
-                        })
+                        
+                        # Собираем данные в точной структуре
+                        new_pet = {
+                            "name": new_name,
+                            "type": new_type,
+                            "age_category": new_age_cat,
+                            "status": new_status,
+                            "age": new_age,
+                            "needs": new_needs,
+                            "desc": new_desc,
+                            "img": img_data
+                        }
+                        
+                        # Добавляем в оперативную память сайта
+                        st.session_state.animals_list.append(new_pet)
+                        
                         save_animals(st.session_state.animals_list)
-                        st.success("Успешно добавлен!")
                         st.rerun()
-        
+                        
+                        st.success(f"🎉 {new_name} успешно добавлен на сайт!")
+                        st.rerun()
+                    else:
+                        st.error("Пожалуйста, введите кличку и описание.")
+
         with tab2:
             st.subheader("📝 Редактирование")
             animals = st.session_state.animals_list
