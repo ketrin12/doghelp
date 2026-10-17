@@ -152,10 +152,6 @@ menu_options = t["nav"]
 menu_choice = st.sidebar.radio(t["lang_label"], menu_options)
 menu_idx = menu_options.index(menu_choice)
 
-
-selected_lang = st.sidebar.selectbox("", ["Русский", "English", "Deutsch"], label_visibility="visible", index=0)
-t = LANG_DICT[selected_lang]
-
 menu_options = t["nav"]
 menu_choice = st.sidebar.radio(t["lang_label"], menu_options)
 menu_idx = menu_options.index(menu_choice)
