@@ -1,4 +1,5 @@
 import streamlit as st
+import requests
 import json
 import os
 import base64
@@ -77,18 +78,54 @@ def file_to_base64(uploaded_file):
         return f"data:image/jpeg;base64,{encoded}"
     return "https://unsplash.com"
 
+DB_FILE = "animals.json"
+
+# Вставь сюда свой скопированный Master Key с сайта JSONBin
+BIN_KEY = "$2a$10$VxXWcC4/bInixOKdXgfpgOv64nA89l1ksvAiQJptNBg1eRzIzSuOi"
+# Ссылка на твою личную корзину (создастся автоматически при первом сохранении)
+BIN_URL = "https://api.jsonbin.v3/b/67110901e41b4d34e444bc30" # Эту ссылку мы обновим после первого теста
+
 def load_animals():
+    # 1. Сначала пытаемся загрузить из локального файла
     if os.path.exists(DB_FILE):
         try:
             with open(DB_FILE, "r", encoding="utf-8") as f:
                 return json.load(f)
         except:
-            return []
+            pass
+            
+    # 2. Если локальный файл стерся (сервер перезагрузился), берем резервную копию из облака!
+    try:
+        headers = {"X-Master-Key": BIN_KEY}
+        response = requests.get(f"{BIN_URL}/latest", headers=headers)
+        if response.status_code == 200:
+            data = response.json()["record"]
+            # Сразу сохраняем локально, чтобы сайт работал быстрее
+            save_animals(data)
+            return data
+    except:
+        pass
+        
     return []
 
 def save_animals(data):
-    with open(DB_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+    # 1. Сохраняем локально для быстрой работы сайта
+    try:
+        with open(DB_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+    except:
+        pass
+        
+    # 2. ОТПРАВЛЯЕМ РЕЗЕРВНУЮ КОПИЮ В ОБЛАКО
+    try:
+        headers = {
+            "Content-Type": "application/json",
+            "X-Master-Key": BIN_KEY
+        }
+        # Отправляем данные методом PUT, чтобы перезаписать старую копию новой
+        requests.put(BIN_URL, json=data, headers=headers)
+    except:
+        pass
 
 # Загружаем текущий список животных
 if 'animals_list' not in st.session_state:
