@@ -190,28 +190,65 @@ if menu_idx == 0:
 
 
     # 1. Исправляем дефолтное значение: выбираем ТОЛЬКО первую вкладку "Все" при старте
-    # 1. Кнопки-переключатели (проверь, чтобы default был равен filter_options[0])
     selected_filter = st.segmented_control(
         "", 
         options=filter_options, 
-        default=filter_options[0]  # Сюда обязательно добавь [0]
+        default=filter_options[0]  # Изменено: теперь выбрана только вкладка "Все", а не весь список
     )
 
-    # 2. Создаем пустой список для отфильтрованных карточек
+    # Фильтруем список
     filtered_animals = []
 
-    # 3. Запускаем цикл по исходной базе (animals_list)
     for pet in st.session_state.animals_list:
         pet_cat = pet.get("age_category", "Взрослый питомец")
         
-        # Строка 206 (проверь, чтобы тут тоже было [0] в конце!)
+        # 1. Если вкладка "Все" или фильтр сброшен
         if selected_filter is None or selected_filter == filter_options[0]:
             filtered_animals.append(pet)
+            
+        # 2. Если выбрана вкладка "Щенки / Котята"
+        elif selected_filter == filter_options[1]:
+            if pet_cat == "Щенок / Котенок":
+             filtered_animals.append(pet)
 
-        # 3. Если выбрана вкладка "Взрослые питомцы" (ИСПРАВЛЕНО 'if p' на 'if pet_cat')
-        elif selected_filter == filter_options[2]:
-            if pet_cat == "Взрослый питомец":
-                filtered_animals.append(pet)
+    # ================= ВСТАВЬ ЭТОТ БЛОК СЮДА (СТРОКИ 216-218) =================
+    if not filtered_animals:
+        st.info(t["no_animals"])
+    else:
+        # Перебираем наш отфильтрованный список и рисуем карточки на экран
+        for pet in filtered_animals:
+            # Создаем красивую рамку или контейнер для каждого животного
+            with st.container(border=True):
+                col_img, col_info = st.columns([1, 2])
+                
+                with col_img:
+                    # Показываем фото хвостика
+                    st.image(pet.get("img", "https://unsplash.com"), use_container_width=True)
+                
+                with col_info:
+                    # Выводим статус животного с твоими кастомными CSS стилями
+                    status = pet.get("status", "В отлове")
+                    if status == "В отлове":
+                        st.markdown(f'<span class="status-badge status-otlov">🚨 В отлове (Срочный вывоз!)</span>', unsafe_allow_html=True)
+                    elif status == "На временной передержке":
+                        st.markdown(f'<span class="status-badge status-perederzhka">🐾 На временной передержке</span>', unsafe_allow_html=True)
+                    else:
+                        st.markdown(f'<span class="status-badge status-street">🏡 На улице</span>', unsafe_allow_html=True)
+                    
+                    # Имя и возраст
+                    st.subheader(f"{pet.get('name', 'Без имени')} ({pet.get('age', 'Возраст не указан')})")
+                    st.write(f"**{t['type']}:** {pet.get('type', '—')} | **{t['age_cat']}:** {pet.get('age_category', '—')}")
+                    st.write(f"**{t['desc']}:** {pet.get('desc', '—')}")
+                    if pet.get("needs"):
+                        st.warning(f"⚠️ **{t['needs']}:** {pet.get('needs')}")
+                    
+                    # Твоя кнопка помощи
+                    if st.button(f"{t['btn_help']} {pet.get('name')}", key=f"help_{pet.get('name')}_{pet.get('age')}"):
+                        st.success(t["alert_help"])
+    # =========================================================================
+
+    # Твоя строка 219:
+    # # === СТРАНИЦА 1: ПОМОЩЬ ===
 
 # === СТРАНИЦА 1: ПОМОЩЬ ===
 elif menu_idx == 1:
