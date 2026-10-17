@@ -152,10 +152,6 @@ menu_options = t["nav"]
 menu_choice = st.sidebar.radio(t["lang_label"], menu_options)
 menu_idx = menu_options.index(menu_choice)
 
-menu_options = t["nav"]
-menu_choice = st.sidebar.radio(t["lang_label"], menu_options)
-menu_idx = menu_options.index(menu_choice)
-
 # === СТРАНИЦА 0: ГЛАВНАЯ ===
 if menu_idx == 0:
     st.title(t["title_main"])
