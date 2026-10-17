@@ -133,9 +133,14 @@ def save_animals(data):
             "Content-Type": "application/json",
             "X-Master-Key": DIN_KEY
         }
-        requests.put(DIN_URL, json=data, headers=headers)
-    except:
-        pass
+        response = requests.put(DIN_URL, json=data, headers=headers)
+        
+        # ЕСЛИ СЕРВЕР ОТВЕТИЛ С ОШИБКОЙ, МЫ ЕЁ УВИДИМ:
+        if response.status_code != 200:
+            st.error(f"🚨 JSONBin Error ({response.status_code}): {response.text}")
+    except Exception as e:
+        # ЕСЛИ УПАЛ САМ ЗАПРОС, МЫ ТОЖЕ УВИДИМ:
+        st.error(f"🚨 Network Error: {e}")
 
 # Загружаем текущий список животных
 if 'animals_list' not in st.session_state:
