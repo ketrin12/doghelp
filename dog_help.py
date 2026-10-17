@@ -188,38 +188,31 @@ if menu_idx == 0:
     else:
         filter_options = ["Alle", "Welpen / Kätzchen (0-1 Jahr)", "Erwachsene Tiere (1+ Jahre)"]
 
-    # Кнопки-переключатели на самом верху страницы
-        # Кнопки-переключатели на самом верху страницы
-    # Кнопки-переключатели на самом верху страницы
+
+    # 1. Исправляем дефолтное значение: выбираем ТОЛЬКО первую вкладку "Все" при старте
     selected_filter = st.segmented_control(
         "", 
         options=filter_options, 
-        default=filter_options[0]  # По умолчанию выбрано "Все"
+        default=filter_options[0]  # Изменено: теперь выбрана только вкладка "Все", а не весь список
     )
 
     # Фильтруем список
     filtered_animals = []
-    
-    # Узнаем, какую вкладку по счету нажал пользователь (0, 1 или 2)
-    try:
-        filter_idx = filter_options.index(selected_filter)
-    except:
-        filter_idx = 0  # Если что-то пошло не так, показываем "Все"
 
     for pet in st.session_state.animals_list:
         pet_cat = pet.get("age_category", "Взрослый питомец")
         
-        # Индекс 0: Вкладка "Все"
-        if filter_idx == 0:
+        # 1. Если вкладка "Все" или фильтр сброшен
+        if selected_filter is None or selected_filter == filter_options[0]:
             filtered_animals.append(pet)
             
-        # Индекс 1: Вкладка "Щенки / Котята"
-        elif filter_idx == 1:
+        # 2. Если выбрана вкладка "Щенки / Котята"
+        elif selected_filter == filter_options[1]:
             if pet_cat == "Щенок / Котенок":
                 filtered_animals.append(pet)
                 
-        # Индекс 2: Вкладка "Взрослые питомцы"
-        elif filter_idx == 2:
+        # 3. Если выбрана вкладка "Взрослые питомцы" (ИСПРАВЛЕНО 'if p' на 'if pet_cat')
+        elif selected_filter == filter_options[2]:
             if pet_cat == "Взрослый питомец":
                 filtered_animals.append(pet)
 
