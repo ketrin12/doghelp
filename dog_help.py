@@ -68,31 +68,30 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-DB_FILE = "animals.json"
+from streamlit_gsheets import GSheetsConnection
+import pandas as pd
 
-def file_to_base64(uploaded_file):
-    if uploaded_file is not None:
-        file_bytes = uploaded_file.read()
-        encoded = base64.b64encode(file_bytes).decode("utf-8")
-        return f"data:image/jpeg;base64,{encoded}"
-    return "https://unsplash.com"
+# Ссылка на твою красивую Google Таблицу хвостиков
+SHEET_URL = "https://docs.google.com/spreadsheets/d/1wM1ZNiJcyTOEC6yhAGeKxDuIkNapVCWP5WZ0TsJOS5g/edit?gid=0#gid=0"
+
+# Настраиваем подключение к Google Sheets
+conn = st.connection("gsheets", type=GSheetsConnection)
 
 def load_animals():
-    if os.path.exists(DB_FILE):
-        try:
-            with open(DB_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except:
-            return []
-    return []
+    try:
+        # Читаем данные напрямую онлайн из твоей таблицы хвостиков
+        df = conn.read(spreadsheet=SHEET_URL, ttl="0d")
+        return df.fillna("").to_dict(orient="records")
+    except Exception as e:
+        # Если таблица пока недоступна, сайт не упадет, а вернет пустой список
+        return []
 
 def save_animals(data):
-    with open(DB_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
-
-# Загружаем текущий список животных
-if 'animals_list' not in st.session_state:
-    st.session_state.animals_list = load_animals()
+    try:
+        df = pd.DataFrame(data)
+        conn.update(spreadsheet=SHEET_URL, data=df)
+    except Exception as e:
+        pass
 
 # 1. Сначала идет сам словарь со всеми переводами (строка 108+)
 # ================= МУЛЬТИЯЗЫЧНОСТЬ =================
