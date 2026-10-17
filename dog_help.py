@@ -94,8 +94,26 @@ def save_animals(data):
 if 'animals_list' not in st.session_state:
     st.session_state.animals_list = load_animals()
 
-# 3. Боковое меню (Sidebar) для навигации
-menu = st.sidebar.radio("Навигация по сайту", ["Главная (Питомцы)", "Помочь хвостикам", "Панель управления", "О нас"])
+# 1. Сначала идет сам словарь со всеми переводами (строка 108+)
+LANG_DICT = {
+    "Русский": {
+        # тут твои переводы...
+    },
+    "English": {
+        # тут твои переводы...
+    },
+    "Deutsch": {
+        # тут твои переводы...
+    }
+}
+
+# 2. И ТОЛЬКО ПОСЛЕ НЕГО идут эти строчки выбора языка:
+selected_lang = st.sidebar.selectbox("", ["Русский", "English", "Deutsch"], label_visibility="visible", index=0)
+t = LANG_DICT[selected_lang]
+
+menu_options = t["nav"]
+menu_choice = st.sidebar.radio(t["lang_label"], menu_options)
+menu_idx = menu_options.index(menu_choice)
 
 # ================= МУЛЬТИЯЗЫЧНОСТЬ =================
 LANG_DICT = {
@@ -258,7 +276,7 @@ elif menu_idx == 1:
         st.write("**Phone / Viber:** +375 (29) XXX-XX-XX (Татьяна)")
 
 # === СТРАНИЦА 2: ПОМОЩЬ ===
-elif menu == "Помочь хвостикам":
+elif menu_idx == 1:
     st.title("💚 Поддержать подопечных и передержку")
     st.write("Все средства идут точечно на спасение животных из отлова, оплату временных передержек и лечение.")
     
