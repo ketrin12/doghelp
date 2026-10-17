@@ -198,7 +198,7 @@ if menu_idx == 0:
 
     # Фильтруем список
     filtered_animals = []
-    for pet in animals:
+    for pet in 'animals_list':
         pet_cat = pet.get("age_category", "Взрослый питомец")
         
         # Если выбрано "Все" или фильтр сброшен
