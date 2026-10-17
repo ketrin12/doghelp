@@ -133,7 +133,8 @@ def save_animals(data):
         "X-Master-Key": DIN_KEY  # Используем строго DIN_KEY
     }
     try:
-        response = requests.put(DIN_URL, json=data, headers=headers)
+        # ИСПРАВЛЕНО: передаем 'json=data' вместо несуществующего 'json_data'
+        response = requests.put(DIN_URL, json=data, headers=headers, timeout=5)
         if response.status_code == 200:
             return True
     except:
