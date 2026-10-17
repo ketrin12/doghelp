@@ -88,12 +88,10 @@ def load_animals():
 
 def save_animals(data):
     try:
-        # Превращаем обновленный список собак обратно в таблицу pandas
         df = pd.DataFrame(data)
-        # Отправляем обновленные данные в твою Google Таблицу онлайн
         conn.update(spreadsheet=SHEET_URL, data=df)
     except Exception as e:
-        st.error(f"Ошибка сохранения: {e}")
+        pass
 
 # 1. Сначала идет сам словарь со всеми переводами (строка 108+)
 # ================= МУЛЬТИЯЗЫЧНОСТЬ =================
