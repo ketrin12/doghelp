@@ -95,19 +95,20 @@ DIN_URL = f"https://api.jsonbin.v3/b/{DIN_ID}"
 DB_FILE = "animals.json"
 
 def load_animals():
-    # Просто читаем локальный файл, сайт будет летать мгновенно
-    if os.path.exists(DB_FILE):
+    # Читаем базу данных прямо из встроенных секретов сервера Streamlit Cloud
+    if "animals_db" in st.secrets:
         try:
-            with open(DB_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
+            return json.loads(st.secrets["animals_db"])
         except:
             return []
     return []
 
 def save_animals(data):
-    # Просто сохраняем локально на сервере
+    # В бесплатной версии Streamlit Cloud изменять секреты через код напрямую нельзя,
+    # поэтому мы выведем для Татьяны готовую кнопку «Скачать резервную копию», 
+    # либо ты сам сможешь раз в месяц закидывать текстовую строчку в настройки сайта.
     try:
-        with open(DB_FILE, "w", encoding="utf-8") as f:
+        with open("animals.json", "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
     except:
         pass
