@@ -225,7 +225,7 @@ if menu_idx == 0:
         st.info(t["no_animals"])
     else:
         # Перебираем наш отфильтрованный список и рисуем карточки на экран
-        for pet in filtered_animals:
+        for i, pet in enumerate(filtered_animals):
             # Создаем красивую рамку или контейнер для каждого животного
             with st.container(border=True):
                 col_img, col_info = st.columns([1, 2])
