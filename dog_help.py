@@ -328,6 +328,7 @@ elif menu_idx == 2:
                     "В отлове (Срочный вывоз!)", 
                     "На временной передержке", 
                     "Живет на улице (Нужна помощь)"
+                    "Уехал(а) домой!"
                 ])
                 new_age = st.text_input("Примерный возраст")
                 new_needs = st.text_input("В чем нуждается? (например: Сбор на корм, Нужен дом)")
@@ -378,7 +379,7 @@ elif menu_idx == 2:
                     cat_idx = cat_list.index(current_pet.get("age_category", "Взрослый питомец")) if current_pet.get("age_category") in cat_list else 1
                     edit_age_cat = st.selectbox("Категория возраста", cat_list, index=cat_idx)
                     
-                    edit_status = st.selectbox("Статус", ["В отлове (Срочный вывоз!)", "На временной передержке", "Живет на улице (Нужна помощь)"], index=0)
+                    edit_status = st.selectbox("Статус", ["В отлове (Срочный вывоз!)", "На временной передержке", "Живет на улице (Нужна помощь)", "Уехал(а) домой!"], index=0)
                     edit_age = st.text_input("Точный возраст", value=current_pet.get("age", ""))
                     edit_needs = st.text_input("Нужды", value=current_pet.get("needs", ""))
                     edit_desc = st.text_area("Описание", value=current_pet.get("desc", ""))
