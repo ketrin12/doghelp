@@ -10,9 +10,6 @@ st.set_page_config(
     page_icon="🐾"
 )
 
-# Вставляем тег верификации Google
-st.html('<meta name="google-site-verification" content="gBXDY2cW6llS-iFaCrFNSx6J6oi1wLvMSdvug5lAnbA" />')
-
 # Кастомные стили (Палитра Татьяны)
 st.markdown("""
     <style>
