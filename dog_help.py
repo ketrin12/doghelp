@@ -4,12 +4,11 @@ import json
 import os
 import base64
 
-# Настройка страницы (добавь параметр meta_tags внутрь)
+# Настройка страницы (СТРОГО КАК БЫЛО ИЗНАЧАЛЬНО!)
 st.set_page_config(
     page_title="Помощь хвостикам — Передержка и ОСВВ",
     page_icon="🐾",
-    layout="wide",
-    meta_tags=[{"name": "yandex-verification", "content": "95a46b894fd5cf37"}]
+    layout="wide"
 )
 
 # Кастомные стили (Палитра Татьяны)
