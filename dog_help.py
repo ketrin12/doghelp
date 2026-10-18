@@ -11,6 +11,8 @@ st.set_page_config(
     layout="wide"
 )
 
+st.html('<meta name="google-site-verification" content="gBXDY2cWpT8mKjL-p9wXvN8lI4jI6R_t9bS3MvJ2oEE" />')
+
 # Кастомные стили (Палитра Татьяны)
 st.markdown("""
     <style>
