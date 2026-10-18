@@ -241,7 +241,7 @@ if menu_idx == 0:
                         st.markdown(f'<span class="status-badge status-otlov">🚨 В отлове (Срочный вывоз!)</span>', unsafe_allow_html=True)
                     elif status == "На временной передержке":
                         st.markdown(f'<span class="status-badge status-perederzhka">🐾 На временной передержке</span>', unsafe_allow_html=True)
-                    else:
+                    elif status == "Уехал(а) домой":
                         st.markdown(f'<span class="status-badge status-street">🏡 Уехал(а) домой! 🎉</span>', unsafe_allow_html=True)
 
                     
