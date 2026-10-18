@@ -1,14 +1,17 @@
 import streamlit as st
+import requests
 import json
 import os
 import base64
 
-# 1. Настройка страницы и темы
+# Настройка страницы (СТРОГО КАК БЫЛО ИЗНАЧАЛЬНО!)
 st.set_page_config(
-    page_title="Помощь хвостикам — Передержка и ОСВВ",
-    page_icon="🐾",
-    layout="wide"
+    page_title="Помощь хвостикам — Речица",
+    page_icon="🐾"
 )
+
+# Вставляем тег верификации Google
+st.html('<meta name="google-site-verification" content="gBXDY2cW6llS-iFaCrFNSx6J6oi1wLvMSdvug5lAnbA" />')
 
 # Кастомные стили (Палитра Татьяны)
 st.markdown("""
@@ -68,30 +71,53 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-from streamlit_gsheets import GSheetsConnection
-import pandas as pd
+DB_FILE = "animals.json"
 
-# Ссылка на твою красивую Google Таблицу хвостиков
-SHEET_URL = "https://docs.google.com/spreadsheets/d/1wM1ZNiJcyTOEC6yhAGeKxDuIkNapVCWP5WZ0TsJOS5g/edit?gid=0#gid=0"
+def file_to_base64(uploaded_file):
+    if uploaded_file is not None:
+        file_bytes = uploaded_file.read()
+        encoded = base64.b64encode(file_bytes).decode("utf-8")
+        return f"data:image/jpeg;base64,{encoded}"
+    return "https://unsplash.com"
 
-# Настраиваем подключение к Google Sheets
-conn = st.connection("gsheets", type=GSheetsConnection)
+DB_FILE = "animals.json"
+
+# Вставь сюда свой скопированный Master Key с сайта JSONBin
+DIN_KEY = "$2a$10$VxXWcC4/bInixOKdXgfpgOv64nA89l1ksvAiQJptNBg1eRzIzSuOi"
+# Ссылка на твою личную корзину (создастся автоматически при первом сохранении)
+DIN_URL = "https://api.jsonbin.v3/b/67110901e41b4d34e444bc30" # Эту ссылку мы обновим после первого теста
+
+DB_FILE = "animals.json"
+
+# Настройки твоего резервного облака
+DIN_KEY = "$2b$10$VvXwcc4/bInixOKdxGfgPOv64nA89l1ksvAiQJptNBGiERzIz5uOi"
+DIN_ID = "64d3679affd5d16053736a4f"
+DIN_URL = f"https://api.jsonbin.v3/b/{DIN_ID}"
+
+DB_FILE = "animals.json"
 
 def load_animals():
+    """Безопасная загрузка: сначала ищет файл на компьютере, если его нет — создает пустой список"""
     try:
-        # Читаем данные напрямую онлайн из твоей таблицы хвостиков
-        df = conn.read(spreadsheet=SHEET_URL, ttl="0d")
-        return df.fillna("").to_dict(orient="records")
-    except Exception as e:
-        # Если таблица пока недоступна, сайт не упадет, а вернет пустой список
-        return []
+        if os.path.exists("animals.json"):
+            with open("animals.json", "r", encoding="utf-8") as f:
+                return json.load(f)
+    except:
+        pass
+    return []
 
 def save_animals(data):
+    """Железобетонное сохранение данных в файл на диске"""
     try:
-        df = pd.DataFrame(data)
-        conn.update(spreadsheet=SHEET_URL, data=df)
-    except Exception as e:
-        pass
+        with open("animals.json", "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        return True
+    except:
+        return False
+
+    # ИНИЦИАЛИЗАЦИЯ: Если списка еще нет в памяти, мы загружаем его из наших Secrets
+if 'animals_list' not in st.session_state:
+    st.session_state.animals_list = load_animals()
 
 # 1. Сначала идет сам словарь со всеми переводами (строка 108+)
 # ================= МУЛЬТИЯЗЫЧНОСТЬ =================
@@ -164,74 +190,78 @@ if menu_idx == 0:
     else:
         filter_options = ["Alle", "Welpen / Kätzchen (0-1 Jahr)", "Erwachsene Tiere (1+ Jahre)"]
 
-    # Кнопки-переключатели на самом верху страницы
-        # Кнопки-переключатели на самом верху страницы
+
+    # 1. Исправляем дефолтное значение: выбираем ТОЛЬКО первую вкладку "Все" при старте
     selected_filter = st.segmented_control(
         "", 
         options=filter_options, 
-        default=filter_options[0]  # По умолчанию выбрано "Все"
+        default=filter_options[0]  # Изменено: теперь выбрана только вкладка "Все", а не весь список
     )
 
-    animals = st.session_state.animals_list
-
+    # Фильтруем список
     # Фильтруем список
     filtered_animals = []
-    for pet in animals:
+
+    for pet in st.session_state.animals_list:
         pet_cat = pet.get("age_category", "Взрослый питомец")
         
-        # Если выбрано "Все" или фильтр сброшен
-        if selected_filter == filter_options[0] or selected_filter is None:
+        # Переводим выбранный фильтр в нижний регистр для безопасного поиска
+        current_filter = str(selected_filter).lower() if selected_filter else ""
+        
+        # 1. Если выбрана вкладка "Все" (или её аналоги на других языках) или фильтр сброшен
+        if not selected_filter or "все" in current_filter or "all" in current_filter or "alle" in current_filter:
             filtered_animals.append(pet)
-        # Если выбрана вкладка Щенки
-        elif selected_filter == filter_options[1]:
+            
+        # 2. Если в выбранной кнопке есть слово про щенков/котят
+        elif "щен" in current_filter or "pupp" in current_filter or "welp" in current_filter:
             if pet_cat == "Щенок / Котенок":
                 filtered_animals.append(pet)
-        # Если выбрана вкладка Взрослые
-        elif selected_filter == filter_options[2]:
+                
+        # 3. Если в выбранной кнопке есть слово про взрослых питомцев
+        elif "взрос" in current_filter or "adult" in current_filter or "erwach" in current_filter:
             if pet_cat == "Взрослый питомец":
                 filtered_animals.append(pet)
 
-            if pet_cat == "Щенок / Котенок":
-                filtered_animals.append(pet)
-        else: # Выбрано "Взрослые"
-            if pet_cat == "Взрослый питомец":
-                filtered_animals.append(pet)
-
-    # Выводим на экран уже отфильтрованных животных
+    # ================= ВСТАВЬ ЭТОТ БЛОК СЮДА (СТРОКИ 216-218) =================
     if not filtered_animals:
-        st.info("В этой категории сейчас нет подопечных. Посмотрите другие вкладки! 🥰")
+        st.info(t["no_animals"])
     else:
-        for i in range(0, len(filtered_animals), 3):
-            cols = st.columns(3)
-            for j in range(3):
-                idx = i + j
-                if idx < len(filtered_animals):
-                    with cols[j]:
-                        item = filtered_animals[idx]
-                        
-                        try:
-                            st.image(item["img"], use_container_width=True)
-                        except:
-                            st.warning("⚠️ Photo error")
-                        
-                        status = item.get("status", "На временной передержке")
-                        if "отлове" in status or "rescue" in status or "Tötung" in status:
-                            st.markdown(f'<div class="status-badge status-otlov">🚨 {status}</div>', unsafe_allow_html=True)
-                        elif "улице" in status or "street" in status or "Straße" in status:
-                            st.markdown(f'<div class="status-badge status-street">🏡 {status}</div>', unsafe_allow_html=True)
-                        else:
-                            st.markdown(f'<div class="status-badge status-perederzhka">🐾 {status}</div>', unsafe_allow_html=True)
+        # Перебираем наш отфильтрованный список и рисуем карточки на экран
+        for i, pet in enumerate(filtered_animals):
+            # Создаем красивую рамку или контейнер для каждого животного
+            with st.container(border=True):
+                col_img, col_info = st.columns([1, 2])
+                
+                with col_img:
+                    # Показываем фото хвостика
+                    st.image(pet.get("img", "https://unsplash.com"), use_container_width=True)
+                
+                with col_info:
+                    # Выводим статус животного с твоими кастомными CSS стилями
+                    status = pet.get("status", "В отлове")
+                    if status == "В отлове":
+                        st.markdown(f'<span class="status-badge status-otlov">🚨 В отлове (Срочный вывоз!)</span>', unsafe_allow_html=True)
+                    elif status == "На временной передержке":
+                        st.markdown(f'<span class="status-badge status-perederzhka">🐾 На временной передержке</span>', unsafe_allow_html=True)
+                    elif status == "Уехал(а) домой!":
+                        st.markdown(f'<span class="status-badge status-street">🏡 Уехал(а) домой! 🎉</span>', unsafe_allow_html=True)
+                    elif status == "Живет на улице (Нужна помощь)":
+                        st.markdown(f'<span class="status-badge status-street">🐾 Живет на улице (Нужна помощь)</span>', unsafe_allow_html=True)
 
-                        st.subheader(f"{item['name']} ({item.get('age', '')})")
-                        st.write(f"**{t['type']}:** {item.get('type', '')} | **{t['age_cat']}:** {item.get('age_category', 'Взрослый питомец')}")
-                        st.write(f"**{t['desc']}:** {item['desc']}")
-                        
-                        if item.get("needs"):
-                            st.warning(f"⚠️ **{t['needs']}:** {item['needs']}")
+                    # Имя и возраст
+                    st.subheader(f"{pet.get('name', 'Без имени')} ({pet.get('age', 'Возраст не указан')})")
+                    st.write(f"**{t['type']}:** {pet.get('type', '—')} | **{t['age_cat']}:** {pet.get('age_category', '—')}")
+                    st.write(f"**{t['desc']}:** {pet.get('desc', '—')}")
+                    if pet.get("needs"):
+                        st.warning(f"⚠️ **{t['needs']}:** {pet.get('needs')}")
+                    
+                    # Твоя кнопка помощи
+                    if st.button(f"{t['btn_help']} {pet.get('name')}", key=f"help_{pet.get('name')}_{pet.get('age')}_{i}"):
+                        st.success(t["alert_help"])
+    # =========================================================================
 
-                        if st.button(f"{t['btn_help']} {item['name']}", key=f"btn_{idx}"):
-                            st.success(t["alert_help"])
-                        st.markdown("---")
+    # Твоя строка 219:
+    # # === СТРАНИЦА 1: ПОМОЩЬ ===
 
 # === СТРАНИЦА 1: ПОМОЩЬ ===
 elif menu_idx == 1:
@@ -262,7 +292,7 @@ elif menu_idx == 1:
         st.warning("🚨 **г. Речица, ул. Пролетарская, 118** — Пункт временного содержания (Сюда особенно необходима помощь теплыми вещами на подстилки и сухими кормами!)")
         
         st.markdown("---")
-        st.write("**Телефон куратора:** +375 (29) XXX-XX-XX (Татьяна)")
+        st.write("**Телефон куратора:** +375 (29) 665-84-22 (Татьяна)")
 
 # === СТРАНИЦА 2: ПОМОЩЬ ===
 elif menu_idx == 1:
@@ -279,7 +309,7 @@ elif menu_idx == 1:
     with col2:
         st.subheader("📞 Другие способы помощи")
         st.write("Вы можете помочь руками, передать корм, лекарства или помочь с автопомощью.")
-        st.write("**Телефон куратора:** +375 (29) XXX-XX-XX (Татьяна)")
+        st.write("**Телефон куратора:** +375 (29) 665-84-22 (Татьяна)")
 
 # === СТРАНИЦА 2: ПАНЕЛЬ УПРАВЛЕНИЯ ===
 elif menu_idx == 2:
@@ -291,28 +321,50 @@ elif menu_idx == 2:
         tab1, tab2, tab3 = st.tabs(["➕ Добавить", "✏️ Редактировать", "🗑️ Удалить"])
         
         with tab1:
-            with st.form("add_form", clear_on_submit=True):
-                st.subheader("Добавление подопечного")
-                new_name = st.text_input("Кличка")
+            # Создаем форму для добавления питомца
+            with st.form("add_animal_form", clear_on_submit=True):
+                st.subheader("Добавление нового подопечного")
+                
+                new_name = st.text_input("Кличка животного")
                 new_type = st.selectbox("Кто это?", ["Собака", "Кошка", "Другое"])
                 new_age_cat = st.selectbox("Категория возраста", ["Щенок / Котенок", "Взрослый питомец"])
-                new_status = st.selectbox("Статус", ["В отлове (Срочный вывоз!)", "На временной передержке", "Живет на улице (Нужна помощь)"])
-                new_age = st.text_input("Точный возраст (например: 5 месяцев, 2 года)")
-                new_needs = st.text_input("В чем нуждается?")
-                new_desc = st.text_area("Описание ситуации и характера")
-                uploaded_file = st.file_uploader("Выберите фото питомца", type=["jpg", "jpeg", "png"], key="add_up")
+                new_status = st.selectbox("Текущий статус / Где находится?", [
+                    "В отлове (Срочный вывоз!)", 
+                    "На временной передержке", 
+                    "Живет на улице (Нужна помощь)",
+                    "Уехал(а) домой!",
+                ])
+                new_age = st.text_input("Примерный возраст")
+                new_needs = st.text_input("В чем нуждается? (например: Сбор на корм, Нужен дом)")
+                new_desc = st.text_area("Описание ситуации / Характер")
                 
-                if st.form_submit_button("Добавить"):
+                uploaded_file = st.file_uploader("Выберите фото питомца", type=["jpg", "jpeg", "png"], key="add_upload")
+                
+                # ВОТ ЭТА СТРОКА ОБЯЗАТЕЛЬНО ДОЛЖНА БЫТЬ ТУТ:
+                submit = st.form_submit_button("Добавить на сайт")
+                
+                if submit:
                     if new_name and new_desc:
                         img_data = file_to_base64(uploaded_file)
-                        st.session_state.animals_list.append({
-                            "name": new_name, "type": new_type, "age_category": new_age_cat,
-                            "status": new_status, "age": new_age, "needs": new_needs, "desc": new_desc, "img": img_data
-                        })
+                        
+                        new_pet = {
+                            "name": new_name,
+                            "type": new_type,
+                            "age_category": new_age_cat,
+                            "status": new_status,
+                            "age": new_age,
+                            "needs": new_needs,
+                            "desc": new_desc,
+                            "img": img_data
+                        }
+                        st.session_state.animals_list.append(new_pet)
+                        
+                        # Сохраняем локально и в облако, затем обновляем
                         save_animals(st.session_state.animals_list)
-                        st.success("Успешно добавлен!")
                         st.rerun()
-        
+                    else:
+                        st.error("Пожалуйста, введите кличку и описание.")
+
         with tab2:
             st.subheader("📝 Редактирование")
             animals = st.session_state.animals_list
@@ -331,7 +383,7 @@ elif menu_idx == 2:
                     cat_idx = cat_list.index(current_pet.get("age_category", "Взрослый питомец")) if current_pet.get("age_category") in cat_list else 1
                     edit_age_cat = st.selectbox("Категория возраста", cat_list, index=cat_idx)
                     
-                    edit_status = st.selectbox("Статус", ["В отлове (Срочный вывоз!)", "На временной передержке", "Живет на улице (Нужна помощь)"], index=0)
+                    edit_status = st.selectbox("Статус", ["В отлове (Срочный вывоз!)", "На временной передержке", "Живет на улице (Нужна помощь)", "Уехал(а) домой!"], index=0)
                     edit_age = st.text_input("Точный возраст", value=current_pet.get("age", ""))
                     edit_needs = st.text_input("Нужды", value=current_pet.get("needs", ""))
                     edit_desc = st.text_area("Описание", value=current_pet.get("desc", ""))
@@ -383,7 +435,7 @@ elif menu_idx == 3:
             """)
         with col2:
             st.subheader("📍 Как с нами связаться?")
-            st.markdown("📞 **Телефон куратора:** +375 (29) XXX-XX-XX (Татьяна)")
+            st.markdown("**📞 Телефон куратора:** +375 (29) 665-84-22 (Татьяна)")
             st.markdown("💬 **Telegram / Viber:** @tatyana_khvost_up")
             st.markdown("📌 *Вы можете помочь руками, кормом или автопомощью. Каждый шаг важен!*")
             
@@ -400,7 +452,7 @@ elif menu_idx == 3:
         * **Foster Network:** Providing safe temporary housing, socialization, and medical care.
         * **Street Care & TNR:** Feeding stray animals, providing shelter boxes, and organizing Trap-Neuter-Return programs.
         """)
-        st.write("📞 **Contact Curator:** +375 (29) XXX-XX-XX (Tatyana)")
+        st.write("📞 **Contact Curator:** +375 (29) 665-84-22 (Tatyana)")
         
     else:  # Deutsch
         st.title("🏢 Über unsere Initiative 'Chwost-Up'")
@@ -415,4 +467,4 @@ elif menu_idx == 3:
         * **Pflegestellennetzwerk:** Sicherstellung eines sicheren Lebens in Familien, medizinische Versorgung und Sozialisierung.
         * **Straßenbetreuung:** Fütterung, Kastration und Impfung von Straßenhunden und -katzen.
         """)
-        st.write("📞 **Kontakt:** +375 (29) XXX-XX-XX (Tatyana)")
+        st.write("📞 **Kontakt:** +375 (29) 665-84-22 (Tatyana)")
