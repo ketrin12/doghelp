@@ -243,7 +243,9 @@ if menu_idx == 0:
                         st.markdown(f'<span class="status-badge status-perederzhka">🐾 На временной передержке</span>', unsafe_allow_html=True)
                     elif status == "Уехал(а) домой!":
                         st.markdown(f'<span class="status-badge status-street">🏡 Уехал(а) домой! 🎉</span>', unsafe_allow_html=True)
-                    
+                    elif status == "Живет на улице (Нужна помощь)":
+                        st.markdown(f'<span class="status-badge status-street">🐾 Живет на улице (Нужна помощь)</span>', unsafe_allow_html=True)
+
                     # Имя и возраст
                     st.subheader(f"{pet.get('name', 'Без имени')} ({pet.get('age', 'Возраст не указан')})")
                     st.write(f"**{t['type']}:** {pet.get('type', '—')} | **{t['age_cat']}:** {pet.get('age_category', '—')}")
