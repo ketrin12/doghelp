@@ -252,7 +252,7 @@ if menu_idx == 0:
                         st.warning(f"⚠️ **{t['needs']}:** {pet.get('needs')}")
                     
                     # Твоя кнопка помощи
-                    if st.button(f"{t['btn_help']} {pet.get('name')}", key=f"help_{pet.get('name')}_{pet.get('age')}"):
+                    if st.button(f"{t['btn_help']} {pet.get('name')}", key=f"help_{pet.get('name')}_{pet.get('age')}_{i}"):
                         st.success(t["alert_help"])
     # =========================================================================
 
